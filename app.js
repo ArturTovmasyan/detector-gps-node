@@ -32,9 +32,10 @@ if (cluster.isMaster) {
                 {
                     currentBusPositions[msg.gpsData.imei] = msg.gpsData;
 
+
                     if (msg.sectionPart) {
                         try {
-                            solver.findBusRoute(msg.gpsData.imei, msg.sectionPart.section.id);
+                            solver.collectBusPlace(msg.gpsData.imei, msg.sectionPart.section.id);
                         }
                         catch(e) {
                             console.error(e.message);
