@@ -77,7 +77,7 @@
                             bus_section_part_marker[data.IMEI].setPosition(pos)
                         }
                         else {
-                            marker = new google.maps.Marker({
+                            bus_section_part_marker[data.IMEI] = new google.maps.Marker({
                                 position: pos,
                                 title:"Station",
                                 icon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
