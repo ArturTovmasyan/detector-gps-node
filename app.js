@@ -10,6 +10,7 @@ var loader  = require('./lib/data-loader/loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 var sync    = require('./lib/synchronizer');
+var stat    = require('./lib/statistic');
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
@@ -189,5 +190,14 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
 
     if (backImei) {
         currentBusPositions[backImei].frontImei = imei;
+    }
+
+
+    //Calculate statistic data
+    try {
+        newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id);
+    }
+    catch (e) {
+        console.error(e.message);
     }
 }
