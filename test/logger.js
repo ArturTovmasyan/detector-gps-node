@@ -13,15 +13,18 @@ describe('Preparing to check paths...', function(){
     it('Should exist the path "logs/"',function(){
         var path = 'logs/';
         assert.equal(fs.existsSync(path),true);
+        assert.equal(fs.statSync(path).isDirectory(),true);
     });
 
     it('Should exist the file "logs/dev.log"',function(){
         var path = 'logs/dev.log';
         assert.equal(fs.existsSync(path),true);
+        assert.equal(fs.statSync(path).isFile(),true);
     });
 
     it('Should exist the file "logs/prod.log"',function(){
         var path = 'logs/prod.log';
         assert.equal(fs.existsSync(path),true);
+        assert.equal(fs.statSync(path).isFile(),true);
     });
 });
