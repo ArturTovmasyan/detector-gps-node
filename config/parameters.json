@@ -36,17 +36,18 @@
   },
 
   "loader": {
-    "host":                      "http://10.10.0.22",
-    "lines_ready_event":         "lines_ready_event",
+    "host":                           "http://10.10.0.22",
+    "lines_ready_event":              "lines_ready_event",
     "line_section_parts_ready_event": "section_parts_ready_event",
-    "line_sections_ready_event":      "sections_ready_event"
-
-
+    "line_sections_ready_event":      "sections_ready_event",
+    "lines_ready_event":              "lines_ready_event"
   },
 
   "solver": {
-    "distance_coef":   109718.06,
-    "start_latitude":  40.171613,
-    "start_longitude": 44.538151
+    "distance_coef":             109718.06,
+    "start_latitude":            40.171613,
+    "start_longitude":           44.538151,
+    "LAT_LNG_OF_ONE_METER":      0.000011334405372488942,
+    "ALLOW_DEVIATION_BY_METERS": 30
   }
 }

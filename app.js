@@ -32,26 +32,7 @@ if (cluster.isMaster) {
                 {
                     currentBusPositions[msg.gpsData.imei] = msg.gpsData;
 
-
-                    if (msg.sectionPart) {
-                        try {
-                            solver.collectBusPlace(msg.gpsData.imei, msg.sectionPart.section.id);
-                        }
-                        catch(e) {
-                            console.error(e.message);
-                        }
-                    }
-
-                    if (solver.routeSectionOrder[msg.gpsData.imei]) {
-                        for (var key in solver.routeSectionOrder[msg.gpsData.imei]){
-                            var routeSectionOrder = solver.routeSectionOrder[msg.gpsData.imei];
-                            if (solver.isApproximatelyRising(routeSectionOrder[key])) {
-                                msg.gpsData.routeId = key;
-                            }
-                        }
-                    }
-
-                    io.send({data: msg.gpsData, section_part: msg.sectionPart, routeSectionOrder: solver.routeSectionOrder});
+                    io.send({data: msg.gpsData, section_part: msg.sectionPart});
                 }
             }
         });
@@ -96,24 +77,10 @@ else {
         }
     });
 
-    //start listen for incoming requests from gps devices
-    var dataListener = gps.start(param.gps_controller.port);
+    var dataListener = solver.start();
 
-    //When get gps data send it to the master process
     dataListener.on('data', function(gpsData) {
-
-        //Determine which section part is nearest to the bus
-        var sectionPart = null;
-        try {
-            sectionPart = solver.findNearestSectionPart({imei:      gpsData.imei,
-                                                         latitude:  gpsData.latitude / 10000000,
-                                                         longitude: gpsData.longitude / 10000000});
-        }
-        catch(e) {
-            console.error(e.message);
-        }
-
-        process.send({gpsData: gpsData, sectionPart: sectionPart});
+        process.send({gpsData: gpsData});
     });
 }
 
