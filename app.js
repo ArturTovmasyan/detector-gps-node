@@ -62,10 +62,11 @@ if (cluster.isMaster){
                                 "routeId":     msg.busInfo.gpsData.route_id,
                                 "latitude":    msg.busInfo.gpsData.latitude,
                                 "longitude":   msg.busInfo.gpsData.longitude,
-                                "time":        msg.busInfo.statistic.stopTimes[k]
+                                "time":        msg.busInfo.statistic.stopTimes[k] / 60
                             };
-                            
+
                             kioskSocket.to('' + k).send(sendData);
+                            console.log(sendData);
                         }
                     }
 
