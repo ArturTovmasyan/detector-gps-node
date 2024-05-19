@@ -55,8 +55,10 @@ if (cluster.isMaster){
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
                     consecutiveBuses(msg.busInfo.gpsData.imei, currentBusPositions, busesOrderInRoutes);
 
-                    for(var k in msg.busInfo.statistic.stopTimes) {
-                        kioskSocket.to('' + k).emit(msg.busInfo);
+                    if (msg.busInfo.statistic) {
+                        for (var k in msg.busInfo.statistic.stopTimes) {
+                            kioskSocket.to('' + k).emit(msg.busInfo);
+                        }
                     }
 
                     io.send({busInfo: msg.busInfo});
