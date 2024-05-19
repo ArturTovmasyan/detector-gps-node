@@ -45,6 +45,7 @@ if (cluster.isMaster) {
                     if (solver.routeSectionOrder[msg.gpsData.imei]) {
                         for (var key in solver.routeSectionOrder[msg.gpsData.imei]){
                             var routeSectionOrder = solver.routeSectionOrder[msg.gpsData.imei];
+                            console.log(routeSectionOrder[key]);
                             if (solver.isApproximatelyRising(routeSectionOrder[key])) {
                                 msg.gpsData.routeId = key;
                             }
