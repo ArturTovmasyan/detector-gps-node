@@ -55,8 +55,13 @@
 >>>>>>> 99886ed (mini corrections)
 =======
     "object-sizeof": "1.0.0",
+<<<<<<< HEAD
     "memory-cache": "0.1.4"
 >>>>>>> a554f1d (mem cache)
+=======
+    "memory-cache": "0.1.4",
+    "memwatch": "0.2.2"
+>>>>>>> 689cc34 (add logging)
   },
   "dependencies": {
     "socket.io": "^1.3.5"

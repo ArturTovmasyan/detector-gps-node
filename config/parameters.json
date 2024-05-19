@@ -45,7 +45,7 @@
   },
 
   "loader": {
-    "host":                           "http://10.10.0.22",
+    "host":                           "http://80.86.238.52:81",
     "lines_ready_event":              "lines_ready_event",
     "buses_ready_event":              "buses_ready_event",
     "line_section_parts_ready_event": "section_parts_ready_event",
