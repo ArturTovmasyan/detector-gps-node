@@ -15,6 +15,26 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 
+var db = require('./lib/gps_controller/db');
+
+db.getDataGroupedByIMEIs('02/03/2014', '05/03/2016', function(err, rows, fields) {
+
+    if (err) {
+        console.error('error during get data ' + err);
+    }
+    console.log(rows);
+});
+
+
+db.getDataGroupedByDates("356307042360734", '02/03/2015', '05/03/2015', function(err, rows, fields) {
+
+    if (err) {
+        console.error('error during get data ' + err);
+    }
+    console.log(rows);
+});
+
+
 
 
 if (cluster.isMaster) {
