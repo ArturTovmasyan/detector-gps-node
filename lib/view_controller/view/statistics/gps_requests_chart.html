@@ -105,6 +105,9 @@
 
                 function rest(){
                     var obj = {from: $("#from").val(), to: $("#to").val(), imei: $("#imei").val()};
+                    if((!obj.from && obj.to) || (obj.from && !obj.to)){
+                        return;
+                    }
                     $.ajax({
                         method: "POST",
                         url: "/api/charts_data",
