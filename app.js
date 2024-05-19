@@ -8,7 +8,7 @@ var logger  = require('./lib/logger');
 var api     = require('./lib/api_controller');
 var gps     = require('./lib/gps_controller');
 var loader  = require('./lib/data_loader');
-var param   = require('./config/parameters.json');
+var param   = require('./config/parameters');
 
 var app = require('express')();
 var server = require('http').Server(app);
