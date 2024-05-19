@@ -40,16 +40,24 @@
             $(document).ready(function(){
                 var chart = null;
 
-                function setChartData(data){
+                function setChartData(data,bool){
                     var labels  = [];
                     var bad     = [];
                     var ok      = [];
 
-                    $("#imei").children().remove();
-                    $("#imei").append("<option value='0'>All IMEI</option>");
+                    if(bool) {
+                        $("#imei").children().remove();
+                        $("#imei").append("<option value='0'>All IMEI</option>");
+                    }
+
                     for(var i = 0; i < data.length; i++){
-                        labels.push(data[i].imei);
-                        $("#imei").append("<option value='"+data[i].imei+"'>"+data[i].imei+"</option>");
+                        if(bool) {
+                            labels.push(data[i].imei);
+                            $("#imei").append("<option value='"+data[i].imei+"'>"+data[i].imei+"</option>");
+                        }
+                        else {
+                            labels.push(data[i].date);
+                        }
 
                         bad.push(data[i].allCount-data[i].okCount);
                         ok.push(data[i].okCount);
@@ -81,14 +89,14 @@
                     Chart.defaults.global.scaleLineColor = "rgba(0,0,0,.2)";
 
                     if(!chart){
-                        var d = setChartData(data);
+                        var d = setChartData(data,data[0].imei ? true:false);
                         chart = new Chart(ctx).Bar(d, {
                             barShowStroke: false
                         });
                     }
                     else {
                         chart.destroy();
-                        var d = setChartData(data);
+                        var d = setChartData(data,data[0].imei ? true:false);
                         chart = new Chart(ctx).Bar(d, {
                             barShowStroke: false
                         });
