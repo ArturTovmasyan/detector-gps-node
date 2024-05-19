@@ -14,7 +14,10 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+var viewControl = require('./lib/view_controller');
 
+
+//=================================================================================================
 var db = require('./lib/gps_controller/db');
 
 db.getDataGroupedByIMEIs('02/03/2014', '05/03/2016', function(err, rows, fields) {
@@ -33,7 +36,7 @@ db.getDataGroupedByDates("356307042360734", '02/03/2015', '05/03/2015', function
     }
     console.log(rows);
 });
-
+//=================================================================================================
 
 
 
@@ -60,10 +63,16 @@ if (cluster.isMaster) {
         });
     }
 
+    viewControl.listen(param.charts.port);
+
     server.listen(param.express.stop_port);
 
     app.get('/', function (req, res) {
         res.sendfile(__dirname + '/lib/socket/socket.io.html');
+    });
+
+    app.get('/chart', function (req, res) {
+        res.sendfile(__dirname + '/view/statistics/gps_requests_chart.html');
     });
 
     io.on('connection', function(){

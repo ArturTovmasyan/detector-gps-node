@@ -31,5 +31,8 @@
     "username": "root",
     "password": null,
     "name": "bus_nodejs"
+  },
+  "charts": {
+    "port": 8888
   }
 }
