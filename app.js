@@ -6,7 +6,6 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var log     = require('./lib/logger');
 var api     = require('./lib/api-controller');
-var gps     = require('./lib/gps-controller');
 var loader  = require('./lib/data-loader/loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
@@ -14,6 +13,26 @@ var sync    = require('./lib/synchronizer');
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
+
+
+/*********************************************************************************************
+ currentBusPositions: structure
+
+ {
+     256632985632154: {busInfo described in lib/solver/index.js},
+     172554113625478: {busInfo described in lib/solver/index.js},
+     ...
+ }
+
+ busesOrderInRoutes: structure
+
+ {
+     47: { 8: { 125632874521563: 168, 965425874365219: 205, 687526984365185: 105 },
+           9: { 635478521469854: 8, 265395415215495: 58, 635247851269537: 108 } },
+     58: { ... }
+ }
+
+ ***********************************************************************************************/
 
 
 
@@ -30,8 +49,9 @@ if (cluster.isMaster) {
                 if (!currentBusPositions[msg.busInfo.gpsData.imei] || currentBusPositions[msg.busInfo.gpsData.imei].gpsData.timestamp < msg.busInfo.gpsData.timestamp)
                 {
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
-
                     io.send({busInfo: msg.busInfo});
+
+
                 }
             }
         });
