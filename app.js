@@ -51,8 +51,6 @@ if (cluster.isMaster) {
                         }
                     }
 
-                    console.log(solver.routeSectionOrder);
-
                     io.send({data: msg.gpsData, section_part: msg.sectionPart, routeSectionOrder: solver.routeSectionOrder});
                 }
             }
