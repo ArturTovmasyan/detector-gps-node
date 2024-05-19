@@ -55,5 +55,9 @@
     "MAX_STAY_COUNT_ON_LAST_SECTIONS": 40,
     "LAST_SECTIONS_COUNT": 5,
     "COLLECT_COUNT_FOR_ROUTE":   10
+  },
+
+  "cache": {
+    "expiration_time": 120000
   }
 }
