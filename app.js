@@ -258,11 +258,11 @@ function removeBusDataFromOrdersArray(busInfo, busesOrderInRoutes){
             var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
 
             if (busesOrderInRoute[imei]) {
-                if (newBasInfo.frontImei) {
-                    currentBusPositions[newBasInfo.frontImei].backImei = newBasInfo.backImei;
+                if (busInfo.frontImei) {
+                    currentBusPositions[busInfo.frontImei].backImei = busInfo.backImei;
                 }
-                if (newBasInfo.backImei) {
-                    currentBusPositions[newBasInfo.backImei].frontImei = newBasInfo.frontImei;
+                if (busInfo.backImei) {
+                    currentBusPositions[busInfo.backImei].frontImei = busInfo.frontImei;
                 }
 
                 delete busesOrderInRoute[imei];
