@@ -76,7 +76,7 @@ if (cluster.isMaster){
     }
 
     setInterval(function(){
-        //sync.syncronize();
+        sync.syncronize();
         for(var imei in currentBusPositions){
             busInfo = currentBusPositions[imei];
             var currentDate = new Date();
