@@ -18,7 +18,7 @@
             function mapInit(){
                 var m,data = {};
                 data.center = new google.maps.LatLng(40.1770,44.5148);
-                data.zoom = 16;
+                data.zoom = 10;
                 data.mapTypeId = google.maps.MapTypeId.ROADMAP;
                 m = new google.maps.Map($('#map')[0],data);
                 return m;
@@ -43,13 +43,13 @@
                             position: pos
                         });
                         marker.setMap(map);
-                        map.setCenter(pos);
+//                        map.setCenter(pos);
                         markers[data.IMEI] = marker;
                     }
                     else {
                         var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
                         markers[data.IMEI].setPosition(pos);
-                        map.setCenter(pos);
+//                        map.setCenter(pos);
                     }
                 });
         });
