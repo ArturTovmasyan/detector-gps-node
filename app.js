@@ -65,10 +65,7 @@ if (cluster.isMaster) {
         });
     }
 
-    viewControl.listen(param.express.stop_port);
-
-    //server.listen(param.express.stop_port);
-
+    viewControl.express_start(param.express.stop_port);
 
     io.on('connection', function(){
         console.log('a user connected');
