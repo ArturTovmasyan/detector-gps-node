@@ -174,12 +174,9 @@ if (cluster.isMaster){
         }
 
         //Calculate buses passed routes
-        rCalc.calculateRoutes();
+        //rCalc.calculateRoutes();
 
-        var cache = require("memory-cache");
-        log.log('error', cache.memsize());
-
-    }, 600000);
+    }, 3600000);
 
     viewControl.express_start(param.express.stop_port);
 }
