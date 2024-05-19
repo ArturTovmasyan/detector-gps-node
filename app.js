@@ -3,6 +3,7 @@
  */
 
 var cluster = require('cluster');
+var fs      = require('fs');
 var numCPUs = require('os').cpus().length;
 var logger  = require('./lib/logger');
 var api     = require('./lib/api_controller');
@@ -10,9 +11,10 @@ var gps     = require('./lib/gps_controller');
 var loader  = require('./lib/data_loader');
 var param   = require('./config/parameters');
 
-var app = require('express')();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var express = require('express');
+var app     = express();
+var server  = require('http').Server(app);
+var io      = require('socket.io')(server);
 
 var viewControl = require('./lib/view_controller');
 
@@ -67,12 +69,16 @@ if (cluster.isMaster) {
 
     server.listen(param.express.stop_port);
 
+    app.use(express.static('node_modules'));
+
     app.get('/', function (req, res) {
         res.sendfile(__dirname + '/lib/socket/socket.io.html');
     });
 
     app.get('/chart', function (req, res) {
-        res.sendfile(__dirname + '/view/statistics/gps_requests_chart.html');
+        var data = fs.createReadStream(__dirname + '/lib/view_controller/view/statistics/gps_requests_chart.html');
+        data.pipe(res);
+        //res.send();
     });
 
     io.on('connection', function(){
