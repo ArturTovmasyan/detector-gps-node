@@ -33,5 +33,9 @@
     "username": "root",
     "password": null,
     "name": "bus_nodejs"
+  },
+
+  "loader": {
+    "host": "localhost"
   }
 }
