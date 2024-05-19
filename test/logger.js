@@ -14,6 +14,7 @@ describe('Preparing to check paths...', function(){
         var path = 'logs/';
         assert.equal(fs.existsSync(path),true);
         assert.equal(fs.statSync(path).isDirectory(),true);
+        console.log(fs.statSync(path));
     });
 
     it('Should exist the file "logs/dev.log"',function(){
