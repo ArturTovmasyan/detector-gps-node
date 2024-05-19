@@ -12,6 +12,8 @@ var solver  = require('./lib/solver');
 var sync    = require('./lib/synchronizer');
 var stat    = require('./lib/statistic');
 var api     = require('./lib/api-controller');
+var statChecker = require('./lib/statistic/checker');
+
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
@@ -108,6 +110,8 @@ if (cluster.isMaster){
             }
     });
 
+    var forecastingCheckDateTime = null;
+
     setInterval(function(){
         sync.syncronize();
 
@@ -118,6 +122,13 @@ if (cluster.isMaster){
                 busInfo.busStatus = 'no_data'
             }
         }
+
+        var d = new Date();
+        if (d.getHours() > 21 && (!forecastingCheckDateTime || forecastingCheckDateTime.getDate() != d.getDate())) {
+            forecastingCheckDateTime = new Date();
+            statChecker.calculateAllForecastingErrors(true);
+        }
+
     }, 600000);
 
     viewControl.express_start(param.express.stop_port);
