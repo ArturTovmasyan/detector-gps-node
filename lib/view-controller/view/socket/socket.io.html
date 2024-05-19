@@ -60,7 +60,7 @@
                     var section_part = msg.section_part;
 
                     if (section_part && polylines[section_part.section.id]) {
-                        polylines[section_part.section.id].strokeColor = 'blue';
+                        polylines[section_part.section.id].setOptions({strokeColor: 'blue'});
                         console.log('polylines',polylines);
                         console.log('section_part',section_part);
 
