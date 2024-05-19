@@ -18,7 +18,8 @@
   },
 
   "express": {
-    "stop_port": 7777
+    "stop_port": 7777,
+    "public_vendor": "node_modules"
   },
 
   "logger": {
@@ -31,8 +32,5 @@
     "username": "root",
     "password": null,
     "name": "bus_nodejs"
-  },
-  "charts": {
-    "port": 8888
   }
 }

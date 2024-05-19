@@ -65,21 +65,10 @@ if (cluster.isMaster) {
         });
     }
 
-    viewControl.listen(param.charts.port);
+    viewControl.listen(param.express.stop_port);
 
-    server.listen(param.express.stop_port);
+    //server.listen(param.express.stop_port);
 
-    app.use(express.static('node_modules'));
-
-    app.get('/', function (req, res) {
-        res.sendfile(__dirname + '/lib/socket/socket.io.html');
-    });
-
-    app.get('/chart', function (req, res) {
-        var data = fs.createReadStream(__dirname + '/lib/view_controller/view/statistics/gps_requests_chart.html');
-        data.pipe(res);
-        //res.send();
-    });
 
     io.on('connection', function(){
         console.log('a user connected');
