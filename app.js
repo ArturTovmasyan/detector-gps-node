@@ -20,8 +20,8 @@ var io          = viewControl.get_socket();
  currentBusPositions: structure
 
  {
-     256632985632154: {busInfo described in lib/solver/index.js && frontImei: 256354562148765, backImei: 256357845862545},
-     172554113625478: {busInfo described in lib/solver/index.js && frontImei: 115225482526947, backImei: 256357845785145},
+     256632985632154: {busInfo described in lib/solver/index.js && frontImei: 256354562148765, backImei: 256357845862545, firstDataInRoute: { route_id: 8, timestamp: '2015-06-15 15:12:25', section_part_id: 25586} },
+     172554113625478: {busInfo described in lib/solver/index.js && frontImei: 115225482526947, backImei: 256357845785145, firstDataInRoute: { route_id: 9, timestamp: '2015-06-16 18:28:25', section_part_id: 25596} },
      ...
  }
 
@@ -53,6 +53,17 @@ if (cluster.isMaster){
             if (msg.busInfo){
                 if (!currentBusPositions[msg.busInfo.gpsData.imei] || currentBusPositions[msg.busInfo.gpsData.imei].gpsData.timestamp < msg.busInfo.gpsData.timestamp)
                 {
+                    if (currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute &&
+                        currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.route_id == msg.busInfo.gpsData.route_id &&
+                        (msg.busInfo.gpsData.timestamp - currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.timestamp) / 60000 < 5){
+                        msg.busInfo.firstDataInRoute = currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute;
+                    }
+                    else if (msg.busInfo.gpsData.route_id && msg.busInfo.gpsData.section_part_id) {
+                        msg.busInfo.firstDataInRoute.route_id        = msg.busInfo.gpsData.route_id;
+                        msg.busInfo.firstDataInRoute.timestamp       = msg.busInfo.gpsData.timestamp;
+                        msg.busInfo.firstDataInRoute.section_part_id = msg.busInfo.gpsData.section_part_id;
+                    }
+
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
                     consecutiveBuses(msg.busInfo.gpsData.imei, currentBusPositions, busesOrderInRoutes);
 
@@ -206,11 +217,21 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
         currentBusPositions[backImei].frontImei = imei;
     }
 
+    //Calculate coefficient for based on last data for statistic
+    var coeff = 1;
+    if (newBasInfo.firstDataInRoute) {
+        var lastStatistic = stat.getTimeStatistics(newBasInfo.gpsData.route_id, newBasInfo.firstDataInRoute.section_part_id, newBasInfo.gpsData.section_part_id, 1, false);
+
+        coeff = ((newBasInfo.gpsData.timestamp - newBasInfo.firstDataInRoute.timestamp) / 1000) / lastStatistic.passTime;
+        if (!coeff || coeff == Infinity) {
+            coeff = 1;
+        }
+    }
 
     //Calculate statistic data
     try {
         if (currentBusPositions[frontImei] && newBasInfo.gpsData.section_part_id && currentBusPositions[frontImei].gpsData.section_part_id) {
-            newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id);
+            newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id, coeff, false);
         }
     }
     catch (e) {
