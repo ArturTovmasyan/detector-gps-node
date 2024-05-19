@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `gps_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `imei` varchar(20) NOT NULL,
-  `timestamp` int(11) NOT NULL,
+  `timestamp` varchar(30) NOT NULL,
   `priority` smallint(6) NOT NULL,
   `longitude` double NOT NULL,
   `latitude` double NOT NULL,
