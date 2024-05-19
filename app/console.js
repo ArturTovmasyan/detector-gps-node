@@ -14,15 +14,13 @@ var commands = {
 
 commands = marge(commands, tableCommands);
 
-if (process.argv[2]) {
-    if (!commands[process.argv[2]]) {
-        showHelp();
-    }
-    else {
-        if (!commands[process.argv[2]].run(process.argv.slice(3))) {
-            console.warn(process.argv[2]);
-            console.log(commands[process.argv[2]].description);
-        }
+if (!process.argv[2] || !commands[process.argv[2]]) {
+    showHelp();
+}
+else {
+    if (!commands[process.argv[2]].run(process.argv.slice(3))) {
+        console.warn(process.argv[2]);
+        console.log(commands[process.argv[2]].description);
     }
 }
 
