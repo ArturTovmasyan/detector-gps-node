@@ -144,6 +144,7 @@ if (cluster.isMaster){
         }
     }, 600000);
 
+    logger.log('error', 'Logger check!!!');
 
     setInterval(function(){
         try {
@@ -155,7 +156,12 @@ if (cluster.isMaster){
 
         //Calculate forecasting errors every day after 21:00
         var d = new Date();
-        if (d.getHours() > 21 && (!forecastingCheckDateTime || forecastingCheckDateTime.getDate() != d.getDate())) {
+
+        logger.log('error', 'Hour timeout. Hour is: ' + d.getHours() +
+                            ' forecasting check Date: ' + forecastingCheckDateTime.getDate() +
+                            ' current date: ' + d.getDate());
+
+        if (d.getHours() >= 21 && (!forecastingCheckDateTime || forecastingCheckDateTime.getDate() != d.getDate())) {
             forecastingCheckDateTime = new Date();
             statChecker.calculateAllForecastingErrors(true);
         }
