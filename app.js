@@ -28,23 +28,10 @@ if (cluster.isMaster) {
 
         workers[i].on('message', function(msg) {
             if (msg.gpsData) {
-                if (!currentBusPositions[msg.gpsData.IMEI] || currentBusPositions[msg.gpsData.IMEI].timestamp < msg.gpsData.data.timestamp) {
-                    currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data;
-                    msg.gpsData.data.IMEI = msg.gpsData.IMEI;
-
-                    //Determine which section part is nearest to the bus
-                    var sectionPart = null;
-                    try {
-                        sectionPart = solver.findNearestSectionPart({imei: msg.gpsData.data.imei,
-                                                                     latitude: msg.gpsData.data.latitude / 10000000,
-                                                                     longitude: msg.gpsData.data.longitude / 10000000});
-                    }
-                    catch(e) {
-                        console.error(e.message);
-                    }
-
-                    io.send({data: msg.gpsData.data, section_part: sectionPart});
-                    console.log(msg.gpsData.data);
+                if (!currentBusPositions[msg.gpsData.imei] || currentBusPositions[msg.gpsData.imei].timestamp < msg.gpsData.timestamp)
+                {
+                    currentBusPositions[msg.gpsData.imei] = msg.gpsData;
+                    io.send({data: msg.gpsData, section_part: msg.sectionPart});
                 }
             }
         });
@@ -94,7 +81,19 @@ else {
 
     //When get gps data send it to the master process
     dataListener.on('data', function(gpsData) {
-        process.send({gpsData: gpsData});
+
+        //Determine which section part is nearest to the bus
+        var sectionPart = null;
+        try {
+            sectionPart = solver.findNearestSectionPart({imei:      gpsData.imei,
+                                                         latitude:  gpsData.latitude / 10000000,
+                                                         longitude: gpsData.longitude / 10000000});
+        }
+        catch(e) {
+            console.error(e.message);
+        }
+
+        process.send({gpsData: gpsData, section_part: sectionPart});
     });
 }
 
