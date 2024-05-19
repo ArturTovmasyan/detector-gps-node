@@ -82,12 +82,15 @@
                     };
                 }
 
-                function updateChart(data){
-                    console.log(data);
-                    if(!data){
+                function updateChart(incomingData){
+                    if(!incomingData){
                         return;
                     }
-                    data = JSON.parse(data);
+
+                    incomingData = JSON.parse(incomingData);
+                    var data = incomingData.chartData;
+                    console.log(incomingData);
+
                     var ctx = document.getElementById("chart").getContext("2d");
                     Chart.defaults.global.scaleLineColor = "rgba(0,0,0,.2)";
 
