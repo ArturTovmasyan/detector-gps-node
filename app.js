@@ -77,7 +77,7 @@ if (cluster.isMaster){
     }
 
     io.on('connection', function() {
-        //io.send(currentBusPositions);
+        io.send(currentBusPositions);
     });
 
     var syncListener = sync.syncronize();
