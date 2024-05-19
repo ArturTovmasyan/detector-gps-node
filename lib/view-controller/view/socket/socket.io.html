@@ -61,10 +61,12 @@
 
                     if (section_part) {
                         polylines[section_part.section.id].strokeColor = 'blue';
+                        console.log('polylines',polylines);
+                        console.log('section_part',section_part);
+
                     }
 
                     console.log('message',data);
-                    console.log('section_part',section_part);
 
                     if(!markers[data.IMEI]) {
                         var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
