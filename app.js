@@ -57,14 +57,16 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
 
     //If there aren't data with such imei remove data with such imei from other routes
     if (!busesOrderInRoutes[lineNumber][routeId][imei]){
-        busesOrderInRoutes[lineNumber].forEach(function(busesOrderInRoute) {
+        for (var k in busesOrderInRoutes[lineNumber]){
+            var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
+
             if (busesOrderInRoute[imei]){
                 currentBusPositions[newBasInfo.frontImei].backImei = null;
                 currentBusPositions[newBasInfo.backImei].frontImei = null;
 
                 delete busesOrderInRoute[imei];
             }
-        });
+        }
     }
 
     busesOrderInRoutes[lineNumber][routeId][imei] = sectionOrder;
@@ -93,6 +95,7 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
     currentBusPositions[frontImei].backImei = imei;
     currentBusPositions[backImei].frontImei = imei;
 }
+
 
 
 if (cluster.isMaster){
