@@ -3,7 +3,8 @@
  */
 
 var tableCommands = require("../lib/models/Table").commands;
-var console = require('better-console');
+var syncCommands  = require("../lib/synchronizer").commands;
+var console       = require('better-console');
 
 var commands = {
     'help': {
@@ -13,6 +14,7 @@ var commands = {
 };
 
 commands = marge(commands, tableCommands);
+commands = marge(commands, syncCommands);
 
 if (!process.argv[2] || !commands[process.argv[2]]) {
     showHelp();
