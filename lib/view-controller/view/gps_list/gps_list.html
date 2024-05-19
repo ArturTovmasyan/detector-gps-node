@@ -44,7 +44,7 @@
                     </thead>
                     <tbody class="table-striped">
                         <tr ng-repeat="g in gps | filter:filterByImei | filter:filterByPlateNumber | filter:filterByLineNumber | filter:filterByLineNumber">
-                            <td ng-bind="$index"></td>
+                            <td ng-bind="$index+1"></td>
                             <td ng-bind="g.imei"></td>
                             <td ng-bind="g.plate_number"></td>
                             <td ng-bind="g.line_number"></td>
