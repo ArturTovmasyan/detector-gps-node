@@ -94,12 +94,23 @@
                         bus_section_part_marker[gpsData.imei].setMap(map);
                     }
 
+
+                    var busIcon = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+                    if (msg.busInfo.status == "on_line"){
+                        busIcon = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                    }
+                    else if (msg.busInfo.status == "no_data"){
+                        busIcon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+                    }
+
+
                     //Create bus marker to show bus place on the map
                     var pos = new google.maps.LatLng(gpsData.latitude / 10000000, gpsData.longitude / 10000000);
                     if(!markers[gpsData.imei]) {
                         var marker = new google.maps.Marker({
                             position: pos,
-                            title: gpsData.imei + '\n' + routeId
+                            title:    gpsData.imei + '\n' + routeId,
+                            icon:     busIcon
                         });
                         marker.setMap(map);
                         markers[gpsData.imei] = marker;
@@ -108,6 +119,7 @@
                     else {
                         markers[gpsData.imei].setPosition(pos);
                         markers[gpsData.imei].setTitle(gpsData.imei + '\n' + routeId);
+                        markers[gpsData.imei].setIcon(busIcon);
                     }
 
                     $(".gps-count").text(markersCount);

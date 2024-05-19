@@ -40,6 +40,15 @@ if (cluster.isMaster) {
         });
     }
 
+    setInterval(function(){
+        currentBusPositions.forEach(function(busInfo) {
+            var currentDate = new Date();
+            if (((currentDate - busInfo.gpsData.timestamp()) / 60000) > 10){
+                busInfo.status = 'no_data'
+            }
+        })
+    }, 600000);
+
     viewControl.express_start(param.express.stop_port);
 
     //Start listen on 8000 port for incoming api requests
