@@ -96,10 +96,10 @@
 
 
                     var busIcon = "http://maps.google.com/mapfiles/kml/paddle/red-blank.png";
-                    if (msg.busInfo.status == "on_line"){
+                    if (msg.busInfo.busStatus == "on_line"){
                         busIcon = "http://maps.google.com/mapfiles/kml/paddle/grn-blank.png";
                     }
-                    else if (msg.busInfo.status == "no_data"){
+                    else if (msg.busInfo.busStatus == "no_data"){
                         busIcon = "http://maps.google.com/mapfiles/kml/paddle/blu-blank.png";
                     }
 
