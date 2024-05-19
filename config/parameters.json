@@ -64,5 +64,9 @@
 
   "cache": {
     "expiration_time": 120000
+  },
+
+  "sequelize": {
+    "bulkSaveCount": 50
   }
 }
