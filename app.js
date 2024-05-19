@@ -90,19 +90,26 @@ if (cluster.isMaster){
                         }
                     }
 
+                    var busOrderInRoute = 0;
+                    if (busesOrderInRoutes[msg.busInfo.lineNumber] && busesOrderInRoutes[msg.busInfo.lineNumber][msg.busInfo.gpsData.route_id]
+                        && busesOrderInRoutes[msg.busInfo.lineNumber][msg.busInfo.gpsData.route_id][msg.busInfo.gpsData.imei]){
+                        busOrderInRoute = busesOrderInRoutes[msg.busInfo.lineNumber][msg.busInfo.gpsData.route_id][msg.busInfo.gpsData.imei];
+                    }
+
                     //Send bus data to corresponding customer
                     var customerData = {
-                        imei:        msg.busInfo.gpsData.imei,
-                        latitude:    msg.busInfo.gpsData.latitude,
-                        longitude:   msg.busInfo.gpsData.longitude,
-                        angle:       msg.busInfo.gpsData.angle,
-                        speed:       msg.busInfo.gpsData.speed,
-                        route_id:    msg.busInfo.gpsData.route_id,
-                        lineNumber:  msg.busInfo.lineNumber,
-                        plateNumber: msg.busInfo.plateNumber,
-                        busStatus:   msg.busInfo.busStatus,
-                        frontImei:   msg.busInfo.frontImei,
-                        passTime:    msg.busInfo.statistic ? msg.busInfo.statistic.passTime : 0
+                        imei:         msg.busInfo.gpsData.imei,
+                        latitude:     msg.busInfo.gpsData.latitude,
+                        longitude:    msg.busInfo.gpsData.longitude,
+                        angle:        msg.busInfo.gpsData.angle,
+                        speed:        msg.busInfo.gpsData.speed,
+                        route_id:     msg.busInfo.gpsData.route_id,
+                        lineNumber:   msg.busInfo.lineNumber,
+                        plateNumber:  msg.busInfo.plateNumber,
+                        busStatus:    msg.busInfo.busStatus,
+                        frontImei:    msg.busInfo.frontImei,
+                        passTime:     msg.busInfo.statistic ? msg.busInfo.statistic.passTime : 0,
+                        orderInRoute: busOrderInRoute
                     };
 
                     customerSocket.to('customerLine' + msg.busInfo.lineNumber).send(customerData);
