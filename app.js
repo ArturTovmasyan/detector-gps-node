@@ -93,7 +93,7 @@ else {
             console.error(e.message);
         }
 
-        process.send({gpsData: gpsData, section_part: sectionPart});
+        process.send({gpsData: gpsData, sectionPart: sectionPart});
     });
 }
 
