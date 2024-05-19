@@ -13,9 +13,21 @@ var loader  = require('./lib/data_loader');
 if (cluster.isMaster) {
 
     var workers = [];
+    //Object to collect all fresh data from gps
+    var currentBusPositions = {};
 
     for (var i = 0; i < numCPUs; i++) {
         workers[i] = cluster.fork();
+
+        workers[i].on('message', function(msg) {
+            if (msg.gpsData) {
+                if (!currentBusPositions[msg.gpsData.IMEI] || currentBusPositions[msg.gpsData.IMEI].timestamp < msg.gpsData.data.timestamp) {
+                    currentBusPositions[data.gpsData.IMEI] = data.gpsData.data
+                }
+
+                console.log(currentBusPositions);
+            }
+        });
     }
 
     //Start listen on 8000 port for incoming api requests
@@ -24,12 +36,12 @@ if (cluster.isMaster) {
     //listen for incoming commands
     apiEmitter.on('load_buses', function() {
         workers.forEach(function(worker) {
-            worker.send('load_buses');
+            worker.send({load_buses: true});
         })
     });
     apiEmitter.on('load_routes', function() {
         workers.forEach(function(worker) {
-            worker.send('load_routes');
+            worker.send({load_routes: true});
         })
     });
 }
@@ -41,13 +53,13 @@ else {
 
     //check data from parent and do corresponding actions
     process.on('message', function (msg) {
-        if (msg == 'load_buses') {
+        if (msg.load_buses) {
             loader.getBuses(function (err, data) {
                 buses = data;
                 console.log('_____buses_loaded_____ process id:' + process.pid);
             });
         }
-        if (msg == 'load_routes') {
+        if (msg.load_routes) {
             loader.getRoutes(function (err, data) {
                 routes = data;
                 console.log('_____routes_loaded_____ process id:' + process.pid);
@@ -56,6 +68,11 @@ else {
     });
 
     //start listen for incoming requests from gps devices
-    gps.start(3129);
+    var dataListener = gps.start(3129);
+
+    //When get gps data send it to the master process
+    dataListener.on('data', function(gpsData) {
+        process.send({gpsData: gpsData});
+    });
 }
 
