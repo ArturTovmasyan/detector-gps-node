@@ -624,6 +624,12 @@ else {
                            FROM gps_info as i
                            WHERE i.id = lastInfoId);
 
+         INSERT statistic (section_part_id, interval_to_pass, timestamp)
+                    VALUES(fromSectionOrder, timeToPass, NOW());
+
+         INSERT statistic (section_part_id, interval_to_pass, timestamp)
+                    VALUES(toSectionOrder, timeToPass, NOW());
+
 
          SET minIsAsc = isAsc(fromSectionPart, routeId);
          SET maxIsAsc = isAsc(toSectionPart, routeId);
@@ -677,4 +683,46 @@ else {
 
 
 
+************************************************************************************************************************
+
+
+ INSERT INTO  `bus_nodejs`.`gps_info` (
+
+ `id` ,
+ `imei` ,
+ `timestamp` ,
+ `priority` ,
+ `longitude` ,
+ `latitude` ,
+ `altitude` ,
+ `angle` ,
+ `satellites` ,
+ `speed` ,
+ `section_part_id` ,
+ `route_id`
+ )
+ VALUES (
+ NULL ,  '356307044345519',  '2015-05-15 13:01:31', '0',  '445084448',  '401816992',  '990',  '222',  '11',  '14', '27760',  '1'
+ )
+
+
+
+ INSERT INTO  `bus_nodejs`.`gps_info` (
+
+ `id` ,
+ `imei` ,
+ `timestamp` ,
+ `priority` ,
+ `longitude` ,
+ `latitude` ,
+ `altitude` ,
+ `angle` ,
+ `satellites` ,
+ `speed` ,
+ `section_part_id` ,
+ `route_id`
+ )
+ VALUES (
+ NULL ,  '356307044345519',  '2015-05-15 13:01:36', '0',  '445084032',  '401816608',  '990',  '0',  '11',  '0', '27761',  '1'
+ )
  */
