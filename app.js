@@ -222,11 +222,16 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
     //Calculate coefficient for based on last data for statistic
     var coeff = 1;
     if (newBasInfo.firstDataInRoute) {
-        var lastStatistic = stat.getTimeStatistics(newBasInfo.gpsData.route_id, newBasInfo.firstDataInRoute.section_part_id, newBasInfo.gpsData.section_part_id, 1, false);
+        try {
+            var lastStatistic = stat.getTimeStatistics(newBasInfo.gpsData.route_id, newBasInfo.firstDataInRoute.section_part_id, newBasInfo.gpsData.section_part_id, 1, false);
 
-        coeff = ((newBasInfo.gpsData.timestamp - newBasInfo.firstDataInRoute.timestamp) / 1000) / lastStatistic.passTime;
-        if (!coeff || coeff == Infinity) {
-            coeff = 1;
+            coeff = ((newBasInfo.gpsData.timestamp - newBasInfo.firstDataInRoute.timestamp) / 1000) / lastStatistic.passTime;
+            if (!coeff || coeff == Infinity) {
+                coeff = 1;
+            }
+        }
+        catch(e){
+            console.log(e.message);
         }
     }
 
