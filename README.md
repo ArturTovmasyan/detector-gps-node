@@ -57,6 +57,12 @@ If program running without forever we can see it by ubuntu command
     kill -9 processID
 ```
 
+For Testing The project you have to install Mocha by global
+```bashp
+    npm install -g mocha
+    Then run: mocha
+```
+
 
 
 
