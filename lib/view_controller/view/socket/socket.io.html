@@ -63,9 +63,9 @@
                         });
                         marker.setMap(map);
                         markers[data.IMEI] = marker;
+                        markersCount++;
                     }
                     else {
-                        markersCount++;
                         var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
                         markers[data.IMEI].setPosition(pos);
                     }
