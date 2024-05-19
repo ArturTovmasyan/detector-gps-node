@@ -44,6 +44,8 @@
 
             var socket = io();
             var markers = [];
+            var markersCount = 0;
+
             socket
                 .on('connect', function () {
                     console.log('socket connected...')
@@ -63,11 +65,12 @@
                         markers[data.IMEI] = marker;
                     }
                     else {
+                        markersCount++;
                         var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
                         markers[data.IMEI].setPosition(pos);
                     }
 
-                    $(".gps-count").text(markers.length);
+                    $(".gps-count").text(markersCount);
                 });
         });
     </script>
