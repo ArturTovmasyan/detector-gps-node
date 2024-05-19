@@ -22,8 +22,10 @@ if (cluster.isMaster) {
         workers[i].on('message', function(msg) {
             if (msg.gpsData) {
                 if (!currentBusPositions[msg.gpsData.IMEI] || currentBusPositions[msg.gpsData.IMEI].timestamp < msg.gpsData.data.timestamp) {
-                    currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data
-		    console.log(currentBusPositions);
+                    currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data;
+
+                    //TODO: need to send by socket to the map currentBusPositions or only msg.gpsData
+		            console.log(currentBusPositions);
                 }
             }
         });
