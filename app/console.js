@@ -36,6 +36,7 @@ function showHelp() {
         console.log(commands[key].description);
     }
 
+    console.log('\n');
     return true;
 }
 
