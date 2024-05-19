@@ -66,7 +66,6 @@ if (cluster.isMaster){
                             };
 
                             kioskSocket.to('' + k).send(sendData);
-                            console.log(sendData);
                         }
                     }
 
