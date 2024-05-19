@@ -6,6 +6,11 @@
         <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
         <link href="/css/html5-reset.css" rel="stylesheet"/>
         <link href="/css/style.css" rel="stylesheet"/>
+        <style>
+            table td {
+                min-width: 150px;
+            }
+        </style>
     </head>
     <body style="background: url('/images/bgnoise_lg.png') repeat left top;" ng-app="Buses" ng-controller="BusesController">
         <div id="container" class="menu" style="width: 300px">
@@ -23,14 +28,23 @@
                 <table class="table table-bordered" style="margin-left: 400px">
                     <thead>
                         <tr>
+                            <td>#</td>
                             <th>IMEI</th>
                             <th>Plate Number</th>
                             <th>Line Number</th>
                             <th>Last Date</th>
                         </tr>
+                        <tr>
+                            <td></td>
+                            <td><input type="text" class="form-control"/></td>
+                            <td><input type="number" class="form-control"/></td>
+                            <td><input type="number" class="form-control"/></td>
+                            <td><input type="text" class="form-control"/></td>
+                        </tr>
                     </thead>
                     <tbody class="table-striped">
                         <tr ng-repeat="g in gps">
+                            <td ng-bind="$index"></td>
                             <td ng-bind="g.imei"></td>
                             <td ng-bind="g.plate_number"></td>
                             <td ng-bind="g.line_number"></td>
