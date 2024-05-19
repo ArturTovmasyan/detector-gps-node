@@ -47,7 +47,7 @@ if (cluster.isMaster) {
                 busInfo.busStatus = 'no_data'
             }
         }
-    }, 1000);
+    }, 600000);
 
     viewControl.express_start(param.express.stop_port);
 
