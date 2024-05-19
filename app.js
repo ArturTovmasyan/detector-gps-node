@@ -61,8 +61,12 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
             var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
 
             if (busesOrderInRoute[imei]){
-                currentBusPositions[newBasInfo.frontImei].backImei = null;
-                currentBusPositions[newBasInfo.backImei].frontImei = null;
+                if (newBasInfo.frontImei) {
+                    currentBusPositions[newBasInfo.frontImei].backImei = null;
+                }
+                if (newBasInfo.backImei) {
+                    currentBusPositions[newBasInfo.backImei].frontImei = null;
+                }
 
                 delete busesOrderInRoute[imei];
             }
@@ -89,11 +93,17 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
     }
 
 
+    //Set front and back imeis and change bront and back imeis of front and back buses
     newBasInfo.frontImei = frontImei;
     newBasInfo.backImei  = backImei;
 
-    currentBusPositions[frontImei].backImei = imei;
-    currentBusPositions[backImei].frontImei = imei;
+    if (frontImei) {
+        currentBusPositions[frontImei].backImei = imei;
+    }
+
+    if (backImei) {
+        currentBusPositions[backImei].frontImei = imei;
+    }
 }
 
 
