@@ -39,7 +39,8 @@ var io          = viewControl.get_socket();
 
 if (cluster.isMaster){
 
-    var kioskSocket = require('./lib/kiosk-socket').socketIo;
+    var kioskSocket    = require('./lib/kiosk-socket').socketIo;
+    var customerSocket = require('./lib/customer-socket').socketIo;
     var workers = [];
 
     //Object to collect all fresh data from gps
@@ -58,7 +59,8 @@ if (cluster.isMaster){
                     if (currentBusPositions[msg.busInfo.gpsData.imei] &&
                         currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute &&
                         currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.route_id == msg.busInfo.gpsData.route_id &&
-                        (msg.busInfo.gpsData.timestamp - currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.timestamp) / 60000 < 5){
+                        (msg.busInfo.gpsData.timestamp - currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.timestamp) / 60000 < 5)
+                    {
                         msg.busInfo.firstDataInRoute = currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute;
                     }
                     else if (msg.busInfo.gpsData.route_id && msg.busInfo.gpsData.section_part_id) {
@@ -84,6 +86,22 @@ if (cluster.isMaster){
                             kioskSocket.to('' + k).send(sendData);
                         }
                     }
+
+                    var customerData = {
+                        imei:        msg.busInfo.gpsData.imei,
+                        latitude:    msg.busInfo.gpsData.latitude,
+                        longitude:   msg.busInfo.gpsData.longitude,
+                        angle:       msg.busInfo.gpsData.angle,
+                        speed:       msg.busInfo.gpsData.speed,
+                        route_id:    msg.busInfo.gpsData.route_id,
+                        lineNumber:  msg.busInfo.lineNumber,
+                        plateNumber: msg.busInfo.plateNumber,
+                        busStatus:   msg.busInfo.busStatus,
+                        frontImei:   msg.busInfo.frontImei,
+                        passTime:    msg.busInfo.statistic ? msg.busInfo.statistic.passTime : 0
+                    };
+
+                    customerSocket.to('customerLine' + msg.busInfo.lineNumber).send(customerData);
 
                     io.send({busInfo: msg.busInfo});
                 }
