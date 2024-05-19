@@ -153,16 +153,44 @@ else {
              ELSE -1
              END as is_asc
 
-             FROM section_part as sp
-             JOIN section as s1 ON s1.id = sp.section_id
+             FROM `bus-way`.section_part as sp
+             JOIN `bus-way`.section as s1 ON s1.id = sp.section_id
 
-             JOIN route_section as rs1 ON rs1.route_id = route_id AND rs1.section_id = s1.id
-             LEFT JOIN route_section as rs2 ON rs2.route_id = route_id AND rs2.section_order = rs1.section_order - 1
-             LEFT JOIN section as s2 ON s2.id = rs2.section_id
+             JOIN `bus-way`.route_section as rs1 ON rs1.route_id = route_id AND rs1.section_id = s1.id
+             LEFT JOIN `bus-way`.route_section as rs2 ON rs2.route_id = route_id AND rs2.section_order = rs1.section_order - 1
+             LEFT JOIN `bus-way`.section as s2 ON s2.id = rs2.section_id
              WHERE sp.id = section_part_id);
 
  END $$
  DELIMITER ;
+
+
+
+
+ DROP FUNCTION IF EXISTS single_statistic;
+ DELIMITER $$
+ CREATE FUNCTION single_statistic (section_part_id1 INT, section_part_id2 INT)
+ RETURNS INT
+ BEGIN
+
+ RETURN (SELECT
+ CASE
+ WHEN (s2.id IS NULL OR s1.point1_id = s2.point1_id OR s1.point1_id = s2.point2_id)
+ THEN 1
+ ELSE -1
+ END as is_asc
+
+ FROM `bus-way`.section_part as sp
+ JOIN `bus-way`.section as s1 ON s1.id = sp.section_id
+
+ JOIN `bus-way`.route_section as rs1 ON rs1.route_id = route_id AND rs1.section_id = s1.id
+ LEFT JOIN `bus-way`.route_section as rs2 ON rs2.route_id = route_id AND rs2.section_order = rs1.section_order - 1
+ LEFT JOIN `bus-way`.section as s2 ON s2.id = rs2.section_id
+ WHERE sp.id = section_part_id);
+
+ END $$
+ DELIMITER ;
+
 
 
 
@@ -179,7 +207,14 @@ else {
     DECLARE timeToPass FLOAT;
     DECLARE routeId INT;
 
+    DECLARE minSectionOrder INT;
+    DECLARE maxSectionOrder INT;
+    DECLARE minSectionPartId INT;
+    DECLARE maxSectionPartId INT;
+    DECLARE temp INT;
+    DECLARE allCount INT;
 
+    # To get all consecutive section parts in given route
     DECLARE curs1 CURSOR FOR  SELECT i1.section_part_id as fromSectionPart, i2.section_part_id as toSectionPart,
                              (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id
 
@@ -204,7 +239,10 @@ else {
         section_part_id2 INT,
         time_to_pass FLOAT,
         route_id INT,
+        section_id INT,
+        section_order INT,
         intermediate_section_part_id INT,
+        intermediate_section_part_order INT,
         interval_to_pass FLOAT
     );
 
@@ -214,56 +252,72 @@ else {
 
         FETCH curs1 INTO sectionPartId1, sectionPartId2, timeToPass, routeId;
 
-        INSERT tblResults (section_part_id1, section_part_id2, time_to_pass, route_id, intermediate_section_part_id, interval_to_pass)
-                             SELECT sectionPartId1, sectionPartId2, timeToPass, routeId, sp.id, (timeToPass / allCount.cnt)
+        # To determine min & max section orders between given section parts and determine which section part in min section and which in max
+        SET minSectionPartId = sectionPartId1;
+        SET minSectionOrder = (SELECT rs.section_order
+                               FROM `bus-way`.section_part as sp
+                               JOIN `bus-way`.route_section as rs ON rs.section_id = sp.section_id AND rs.route_id = routeId
+                               WHERE sp.id = minSectionPartId);
+
+
+        SET maxSectionPartId = sectionPartId2;
+        SET maxSectionOrder = (SELECT rs.section_order
+                               FROM `bus-way`.section_part as sp
+                               JOIN `bus-way`.route_section as rs ON rs.section_id = sp.section_id AND rs.route_id = routeId
+                               WHERE sp.id = maxSectionPartId);
+
+        IF (minSectionOrder > maxSectionOrder) THEN
+            SET temp = minSectionOrder;
+            SET minSectionOrder = maxSectionOrder;
+            SET maxSectionOrder = temp;
+
+            SET temp = minSectionPartId;
+            SET minSectionPartId = maxSectionPartId;
+            SET maxSectionPartId = temp;
+        END IF;
+
+        # To get all count of section parts between given section parts in the given route
+        SET allCount  = (SELECT COUNT(sp.id)
+                         FROM `bus-way`.section_part as sp
+                         JOIN `bus-way`.section as s ON s.id = sp.section_id
+                         JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
+
+                         WHERE ((rs.section_order > minSectionOrder AND rs.section_order < maxSectionOrder)
+                         OR (rs.section_order = minSectionOrder AND minSectionOrder != maxSectionOrder
+                         AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId))
+
+
+                         OR (rs.section_order = maxSectionOrder AND minSectionOrder != maxSectionOrder
+                         AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId))
+
+
+                         OR (rs.section_order = maxSectionOrder AND minSectionOrder = maxSectionOrder
+                         AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId)
+                         AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId)))
+
+                         AND rs.route_id = routeId);
+
+        # To get section parts and pass time of that between given section parts in the given route
+        INSERT tblResults (section_part_id1, section_part_id2, time_to_pass, route_id, section_id, section_order, intermediate_section_part_id, intermediate_section_part_order, interval_to_pass)
+                             SELECT minSectionPartId, maxSectionPartId, timeToPass, routeId, s.id, rs.section_order, sp.id, sp.part_order, (timeToPass / allCount)
                              FROM `bus-way`.section_part as sp
                              JOIN `bus-way`.section as s ON s.id = sp.section_id
                              JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
 
-                             JOIN (SELECT MIN(rs1.section_order) as minOrder, MAX(rs1.section_order) as maxOrder
-                                   FROM `bus-way`.section_part as sp1
-                                   JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = routeId
-                                   WHERE sp1.id = sectionPartId1 OR sp1.id = sectionPartId2) as sectionOrders ON TRUE
-
-                             JOIN (SELECT sp2.id as id
-                                   FROM `bus-way`.section_part as sp2
-                                   JOIN `bus-way`.route_section as rs2 ON rs2.section_id = sp2.section_id AND rs2.route_id = routeId
-                                   WHERE (sp2.id = sectionPartId1 OR sp2.id = sectionPartId2) AND rs2.section_order = (SELECT MIN(rs4.section_order)
-                                                                                                                       FROM `bus-way`.section_part as sp4
-                                                                                                                       JOIN `bus-way`.route_section as rs4 ON rs4.section_id = sp4.section_id AND rs4.route_id = routeId
-                                                                                                                       WHERE sp4.id = sectionPartId1 OR sp4.id = sectionPartId2))
-                                   as minSectionPart ON TRUE
-
-                             JOIN (SELECT sp3.id as id
-                                   FROM `bus-way`.section_part as sp3
-                                   JOIN `bus-way`.route_section as rs3 ON rs3.section_id = sp3.section_id AND rs3.route_id = routeId
-                                   WHERE (sp3.id = sectionPartId1 OR sp3.id = sectionPartId2) AND rs3.section_order = (SELECT MAX(rs5.section_order)
-                                                                                                                       FROM `bus-way`.section_part as sp5
-                                                                                                                       JOIN `bus-way`.route_section as rs5 ON rs5.section_id = sp5.section_id AND rs5.route_id = routeId
-                                                                                                                       WHERE sp5.id = sectionPartId1 OR sp5.id = sectionPartId2))
-                                   as maxSectionPart ON TRUE
+                             WHERE ((rs.section_order > minSectionOrder AND rs.section_order < maxSectionOrder)
+                             OR (rs.section_order = minSectionOrder AND minSectionOrder != maxSectionOrder
+                                 AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId))
 
 
-                             JOIN (SELECT COUNT(sp6.id) as cnt
-                                   FROM `bus-way`.section_part as sp6
-                                   JOIN `bus-way`.section as s ON s.id = sp6.section_id
-                                   JOIN `bus-way`.route_section as rs
-                                   ON rs.section_id = s.id
-
-                                   JOIN (SELECT MIN(rs1.section_order) as minOrder, MAX(rs1.section_order) as maxOrder
-                                   FROM `bus-way`.section_part as sp7
-                                   JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp7.section_id AND rs1.route_id = routeId
-                                   WHERE sp7.id = sectionPartId1 or sp7.id = sectionPartId2) as sectionOrders ON TRUE
-
-                                   WHERE rs.section_order > sectionOrders.minOrder AND rs.section_order < sectionOrders.maxOrder AND rs.route_id = routeId)
-                                   as allCount ON TRUE
+                             OR (rs.section_order = maxSectionOrder AND minSectionOrder != maxSectionOrder
+                                 AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId))
 
 
-                             WHERE ((rs.section_order > sectionOrders.minOrder AND rs.section_order < sectionOrders.maxOrder)
-                             OR (rs.section_order = sectionOrders.minOrder AND minSectionPart.id * isAsc(minSectionPart.id, routeId) < sp.id * isAsc(minSectionPart.id, routeId))
-                             OR (rs.section_order = sectionOrders.maxOrder AND maxSectionPart.id * isAsc(maxSectionPart.id, routeId) < sp.id * isAsc(maxSectionPart.id, routeId)))
+                             OR (rs.section_order = maxSectionOrder AND minSectionOrder = maxSectionOrder
+                                 AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId)
+                                 AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId)))
+
                              AND rs.route_id = routeId;
-                            TODO: there are some problem with isAsc function call
     UNTIL done1 END REPEAT;
     CLOSE curs1;
 
