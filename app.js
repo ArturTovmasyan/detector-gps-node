@@ -151,15 +151,7 @@ else {
  CREATE PROCEDURE statistic (count INT, offset INT, modeId INT)
  BEGIN
 
-    DECLARE timeFrom TIME DEFAULT CURRENT_TIME();
-
     DECLARE done1 INT;
-
-    DECLARE sectionPartId1 INT;
-    DECLARE sectionPartId2 INT;
-    DECLARE timeToPass FLOAT;
-    DECLARE routeId INT;
-
 
     DECLARE minIsAsc INT;
     DECLARE maxIsAsc INT;
@@ -168,21 +160,74 @@ else {
     DECLARE maxSectionOrder INT;
     DECLARE minSectionPartId INT;
     DECLARE maxSectionPartId INT;
+    DECLARE timeToPass FLOAT;
+    DECLARE routeId INT;
     DECLARE temp INT;
     DECLARE allCount INT;
 
     # To get all consecutive section parts in given route
-    DECLARE curs1 CURSOR FOR  SELECT i1.section_part_id as fromSectionPart,
+    DECLARE curs1 CURSOR FOR  SELECT
 
-                             (SELECT i2.section_part_id
-                             FROM bus_nodejs.gps_info as i2
-                             WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as toSectionPart,
-                             (SELECT i2.timestamp - i1.timestamp
-                             FROM bus_nodejs.gps_info as i2
-                             WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as timestamp,
-                             i1.route_id
+                                     CASE
+                                     WHEN (rs1.section_order < rs2.section_order)
+                                     THEN i1.section_part_id
+                                     ELSE i2.section_part_id
+                                     END as fromSectionPart,
+
+                                     CASE
+                                     WHEN (rs1.section_order < rs2.section_order)
+                                     THEN rs1.section_order
+                                     ELSE rs2.section_order
+                                     END as fromSectionOrder,
+
+                                     CASE
+                                     WHEN (rs1.section_order < rs2.section_order)
+                                     THEN i2.section_part_id
+                                     ELSE i1.section_part_id
+                                     END as toSectionPart,
+
+                                     CASE
+                                     WHEN (rs1.section_order < rs2.section_order)
+                                     THEN rs2.section_order
+                                     ELSE rs1.section_order
+                                     END as toSectionOrder,
+
+                                     isAsc(CASE
+                                           WHEN (rs1.section_order < rs2.section_order)
+                                           THEN i1.section_part_id
+                                           ELSE i2.section_part_id
+                                           END,
+                                           i1.route_id) as minIsAsc,
+                                     isAsc(CASE
+                                           WHEN (rs1.section_order < rs2.section_order)
+                                           THEN i2.section_part_id
+                                           ELSE i1.section_part_id
+                                           END,
+                                           i1.route_id) as maxIsAsc,
+
+
+                                    (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id
 
                              FROM bus_nodejs.gps_info as i1
+
+                             JOIN bus_nodejs.gps_info as i2
+                             ON  i1.imei = i2.imei
+                             AND i2.timestamp > i1.timestamp
+                             AND i1.route_id = i2.route_id
+                             AND NOT EXISTS (SELECT *
+                                             FROM bus_nodejs.gps_info as i3
+                                             WHERE i1.imei = i3.imei
+                                             AND i1.route_id = i3.route_id
+                                             AND i3.timestamp > i1.timestamp
+                                             AND i3.timestamp < i2.timestamp)
+
+
+                             JOIN `bus-way`.section_part as sp1 ON sp1.id = i1.section_part_id
+                             JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = i1.route_id
+
+                             JOIN `bus-way`.section_part as sp2 ON sp2.id = i2.section_part_id
+                             JOIN `bus-way`.route_section as rs2 ON rs2.section_id = sp2.section_id AND rs2.route_id = i1.route_id
+
 
                              JOIN `bus-way`.statistic_mode as sm ON sm.id = modeId
                              JOIN `bus-way`.hour_type as ht ON ht.id = sm.hour_type_id
@@ -210,35 +255,7 @@ else {
     SET done1 = 0;
     REPEAT
 
-        FETCH curs1 INTO sectionPartId1, sectionPartId2, timeToPass, routeId;
-
-        # To determine min & max section orders between given section parts and determine which section part in min section and which in max
-        SET minSectionPartId = sectionPartId1;
-        SET minSectionOrder = (SELECT rs.section_order
-                               FROM `bus-way`.section_part as sp
-                               JOIN `bus-way`.route_section as rs ON rs.section_id = sp.section_id AND rs.route_id = routeId
-                               WHERE sp.id = minSectionPartId);
-
-
-        SET maxSectionPartId = sectionPartId2;
-        SET maxSectionOrder = (SELECT rs.section_order
-                               FROM `bus-way`.section_part as sp
-                               JOIN `bus-way`.route_section as rs ON rs.section_id = sp.section_id AND rs.route_id = routeId
-                               WHERE sp.id = maxSectionPartId);
-
-        IF (minSectionOrder > maxSectionOrder) THEN
-            SET temp = minSectionOrder;
-            SET minSectionOrder = maxSectionOrder;
-            SET maxSectionOrder = temp;
-
-            SET temp = minSectionPartId;
-            SET minSectionPartId = maxSectionPartId;
-            SET maxSectionPartId = temp;
-        END IF;
-
-        SET minIsAsc = isAsc(minSectionPartId, routeId);
-        SET maxIsAsc = isAsc(maxSectionPartId, routeId);
-
+        FETCH curs1 INTO minSectionPartId, minSectionOrder, maxSectionPartId, maxSectionOrder, minIsAsc, maxIsAsc, timeToPass, routeId;
 
         # To get all count of section parts between given section parts in the given route
         SET allCount  = (SELECT COUNT(sp.id)
@@ -281,7 +298,7 @@ else {
     UNTIL done1 END REPEAT;
     CLOSE curs1;
 
-    SELECT timeFrom as time_from, CURRENT_TIME() as time_to, intermediate_section_part_id, SUM(interval_to_pass) / COUNT(interval_to_pass) FROM tblResults GROUP BY intermediate_section_part_id;
+    SELECT CURRENT_TIME() as time_to, intermediate_section_part_id, SUM(interval_to_pass) / COUNT(interval_to_pass) FROM tblResults GROUP BY intermediate_section_part_id;
 
  END; $$
  DELIMITER ;
