@@ -96,10 +96,11 @@
                 }
 
                 function rest(){
+                    var obj = {from: $("#from").val(), to: $("#to").val(), imei: $("#imei").val()};
                     $.ajax({
                         method: "POST",
                         url: "/api/charts_data",
-                        data: {from: $("#from").val(), to: $("#to").val(), imei: $("#imei").val()}
+                        data: JSON.stringify(obj)
                     }).done(updateChart);
                 };
 
