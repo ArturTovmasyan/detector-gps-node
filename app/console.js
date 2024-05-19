@@ -18,10 +18,13 @@ if (!process.argv[2] || !commands[process.argv[2]]) {
     showHelp();
 }
 else {
-    if (!commands[process.argv[2]].run(process.argv.slice(3))) {
-        console.warn(process.argv[2]);
-        console.log(commands[process.argv[2]].description);
-    }
+    commands[process.argv[2]].run(process.argv.slice(3), function(err) {
+        if (err) {
+            console.warn(process.argv[2]);
+            console.log(commands[process.argv[2]].description);
+            console.log('\n' + err + '\n');
+        }
+    });
 }
 
 /**
@@ -37,7 +40,6 @@ function showHelp() {
     }
 
     console.log('\n');
-    return true;
 }
 
 /**
