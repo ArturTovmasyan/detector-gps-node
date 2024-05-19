@@ -96,7 +96,8 @@
                     var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
                     if(!markers[data.imei]) {
                         var marker = new google.maps.Marker({
-                            position: pos
+                            position: pos,
+                            title: data.routeId
                         });
                         marker.setMap(map);
                         markers[data.imei] = marker;
@@ -104,6 +105,7 @@
                     }
                     else {
                         markers[data.imei].setPosition(pos);
+                        markers[data.imei].setTitle(data.routeId);
                     }
 
                     $(".gps-count").text(markersCount);
