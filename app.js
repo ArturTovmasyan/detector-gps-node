@@ -53,12 +53,14 @@ if (cluster.isMaster){
             if (msg.busInfo){
                 if (!currentBusPositions[msg.busInfo.gpsData.imei] || currentBusPositions[msg.busInfo.gpsData.imei].gpsData.timestamp < msg.busInfo.gpsData.timestamp)
                 {
-                    if (currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute &&
+                    if (currentBusPositions[msg.busInfo.gpsData.imei] &&
+                        currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute &&
                         currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.route_id == msg.busInfo.gpsData.route_id &&
                         (msg.busInfo.gpsData.timestamp - currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.timestamp) / 60000 < 5){
                         msg.busInfo.firstDataInRoute = currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute;
                     }
                     else if (msg.busInfo.gpsData.route_id && msg.busInfo.gpsData.section_part_id) {
+                        msg.busInfo.firstDataInRoute                 = {};
                         msg.busInfo.firstDataInRoute.route_id        = msg.busInfo.gpsData.route_id;
                         msg.busInfo.firstDataInRoute.timestamp       = msg.busInfo.gpsData.timestamp;
                         msg.busInfo.firstDataInRoute.section_part_id = msg.busInfo.gpsData.section_part_id;
