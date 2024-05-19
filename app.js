@@ -45,12 +45,13 @@ if (cluster.isMaster) {
                     if (solver.routeSectionOrder[msg.gpsData.imei]) {
                         for (var key in solver.routeSectionOrder[msg.gpsData.imei]){
                             var routeSectionOrder = solver.routeSectionOrder[msg.gpsData.imei];
-                            console.log(routeSectionOrder[key]);
                             if (solver.isApproximatelyRising(routeSectionOrder[key])) {
                                 msg.gpsData.routeId = key;
                             }
                         }
                     }
+
+                    console.log(solver.routeSectionOrder);
 
                     io.send({data: msg.gpsData, section_part: msg.sectionPart, routeSectionOrder: solver.routeSectionOrder});
                 }
