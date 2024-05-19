@@ -20,8 +20,8 @@ var io          = viewControl.get_socket();
  currentBusPositions: structure
 
  {
-     256632985632154: {busInfo described in lib/solver/index.js && frontImei: 256354562148765, backImei: 256357845862545, firstDataInRoute: { route_id: 8, timestamp: '2015-06-15 15:12:25', section_part_id: 25586} },
-     172554113625478: {busInfo described in lib/solver/index.js && frontImei: 115225482526947, backImei: 256357845785145, firstDataInRoute: { route_id: 9, timestamp: '2015-06-16 18:28:25', section_part_id: 25596} },
+     256632985632154: {busInfo described in lib/solver/index.js && frontImei: 256354562148765, backImei: 256357845862545, lastCoeff: 0.9, firstDataInRoute: { route_id: 8, timestamp: '2015-06-15 15:12:25', section_part_id: 25586} },
+     172554113625478: {busInfo described in lib/solver/index.js && frontImei: 115225482526947, backImei: 256357845785145, lastCoeff: 0.18, firstDataInRoute: { route_id: 9, timestamp: '2015-06-16 18:28:25', section_part_id: 25596} },
      ...
  }
 
@@ -156,7 +156,12 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
     var sectionOrder = newBasInfo.section_order;
     var routeId      = newBasInfo.gpsData.route_id;
 
-    if (!lineNumber || !sectionOrder || !routeId){
+    if (!lineNumber){
+        return null;
+    }
+
+    if (!sectionOrder || !routeId){
+        removeBusDataFromOrdersArray(newBasInfo, busesOrderInRoutes);
         return null;
     }
 
@@ -171,20 +176,7 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
 
     //If there aren't data with such imei remove data with such imei from other routes
     if (!busesOrderInRoutes[lineNumber][routeId][imei]){
-        for (var k in busesOrderInRoutes[lineNumber]){
-            var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
-
-            if (busesOrderInRoute[imei]){
-                if (newBasInfo.frontImei) {
-                    currentBusPositions[newBasInfo.frontImei].backImei = null;
-                }
-                if (newBasInfo.backImei) {
-                    currentBusPositions[newBasInfo.backImei].frontImei = null;
-                }
-
-                delete busesOrderInRoute[imei];
-            }
-        }
+        removeBusDataFromOrdersArray(newBasInfo, busesOrderInRoutes);
     }
 
     busesOrderInRoutes[lineNumber][routeId][imei] = sectionOrder;
@@ -220,12 +212,15 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
     }
 
     //Calculate coefficient for based on last data for statistic
-    var coeff = 1;
-    if (newBasInfo.firstDataInRoute) {
+    if (!newBasInfo.lastCoeff){
+        newBasInfo.lastCoeff = 1;
+    }
+
+    if (newBasInfo.firstDataInRoute &&  newBasInfo.firstDataInRoute.section_part_id != newBasInfo.gpsData.section_part_id) {
         try {
             var lastStatistic = stat.getTimeStatistics(newBasInfo.gpsData.route_id, newBasInfo.firstDataInRoute.section_part_id, newBasInfo.gpsData.section_part_id, 1, false);
 
-            coeff = ((newBasInfo.gpsData.timestamp - newBasInfo.firstDataInRoute.timestamp) / 1000) / lastStatistic.passTime;
+            var coeff = ((newBasInfo.gpsData.timestamp - newBasInfo.firstDataInRoute.timestamp) / 1000) / lastStatistic.passTime;
             if (!coeff || coeff == Infinity) {
                 coeff = 1;
             }
@@ -235,13 +230,43 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
         }
     }
 
+    if (coeff != 1){
+        newBasInfo.lastCoeff = coeff;
+    }
+
     //Calculate statistic data
     try {
         if (currentBusPositions[frontImei] && newBasInfo.gpsData.section_part_id && currentBusPositions[frontImei].gpsData.section_part_id) {
-            newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id, coeff, false);
+            newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id, newBasInfo.lastCoeff, false);
         }
     }
     catch (e) {
         //console.error(e.message);
+    }
+}
+
+/**
+ * @param busInfo
+ * @param busesOrderInRoutes
+ */
+function removeBusDataFromOrdersArray(busInfo, busesOrderInRoutes){
+    var lineNumber   = busInfo.lineNumber;
+    var imei         = busInfo.gpsData.imei;
+
+    if (busesOrderInRoutes[lineNumber]) {
+        for (var k in busesOrderInRoutes[lineNumber]) {
+            var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
+
+            if (busesOrderInRoute[imei]) {
+                if (newBasInfo.frontImei) {
+                    currentBusPositions[newBasInfo.frontImei].backImei = newBasInfo.backImei;
+                }
+                if (newBasInfo.backImei) {
+                    currentBusPositions[newBasInfo.backImei].frontImei = newBasInfo.frontImei;
+                }
+
+                delete busesOrderInRoute[imei];
+            }
+        }
     }
 }
