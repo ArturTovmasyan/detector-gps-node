@@ -100,7 +100,7 @@
                     if(!markers[gpsData.imei]) {
                         var marker = new google.maps.Marker({
                             position: pos,
-                            title: routeId
+                            title: gpsData.imei + '\n' + routeId
                         });
                         marker.setMap(map);
                         markers[gpsData.imei] = marker;
@@ -108,7 +108,7 @@
                     }
                     else {
                         markers[gpsData.imei].setPosition(pos);
-                        markers[gpsData.imei].setTitle(routeId);
+                        markers[gpsData.imei].setTitle(gpsData.imei + '\n' + routeId);
                     }
 
                     $(".gps-count").text(markersCount);
