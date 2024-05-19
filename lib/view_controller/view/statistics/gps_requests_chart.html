@@ -30,7 +30,7 @@
                     var ok      = [];
 
                     $("#imei").children().remove();
-
+                    $("#imei").append("<option value='0'>All IMEI</option>");
                     for(var i = 0; i < data.length; i++){
                         labels.push(data[i].imei);
                         $("#imei").append("<option value='"+data[i].imei+"'>"+data[i].imei+"</option>");
