@@ -422,10 +422,7 @@ else {
 
 
 
- DROP PROCEDURE IF EXISTS statistic;
- DELIMITER $$
- CREATE PROCEDURE statistic (count INT, offset INT, modeId INT, minId INT, maxId INT)
-     BEGIN
+
 
 
 
@@ -725,4 +722,41 @@ else {
  VALUES (
  NULL ,  '356307044345519',  '2015-05-15 13:01:36', '0',  '445084032',  '401816608',  '990',  '0',  '11',  '0', '27761',  '1'
  )
+
+ ***********************************************************************************************************************
+
+
+ DROP PROCEDURE IF EXISTS statistic;
+ DELIMITER $$
+ CREATE PROCEDURE statistic (modeId INT)
+ BEGIN
+
+    INSERT `bus-way`.statistic (statistic_mode_id, route_id, section_part_id, algorithm, times_sum, times_count)
+
+         SELECT modeId,
+         FROM statistic as s
+
+
+         JOIN `bus-way`.statistic_mode as sm ON sm.id = modeId
+         JOIN `bus-way`.hour_type as ht ON ht.id = sm.hour_type_id
+         JOIN `bus-way`.hour_interval as hi ON hi.hour_type_id = ht.id
+
+
+
+         WHERE i1.route_id IS NOT NULL
+         AND ((sm.week_day_from <= sm.week_day_to AND sm.week_day_from <= DAYOFWEEK(i1.timestamp) AND sm.week_day_to >= DAYOFWEEK(i1.timestamp))
+         OR (sm.week_day_from > sm.week_day_to AND (sm.week_day_from <= DAYOFWEEK(i1.timestamp) OR sm.week_day_to >= DAYOFWEEK(i1.timestamp))))
+         AND   ((sm.month_from <= sm.month_to AND sm.month_from <= MONTH(i1.timestamp) AND sm.month_to >= MONTH(i1.timestamp))
+         OR (sm.month_from > sm.month_to AND (sm.month_from <= MONTH(i1.timestamp) OR sm.month_to >= MONTH(i1.timestamp))))
+         AND   ((hi.time_from <= hi.time_to AND hi.time_from <= TIME(i1.timestamp) AND hi.time_to >= TIME(i1.timestamp))
+         OR (hi.time_from > hi.time_to AND (hi.time_from <= TIME(i1.timestamp) OR hi.time_to >= TIME(i1.timestamp))))
+
+
+         GROUP BY s.section_part_id
+
+
+ END $$;
+ DELIMITER ;
+
+
  */
