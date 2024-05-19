@@ -33,7 +33,12 @@ if (cluster.isMaster) {
                     currentBusPositions[msg.gpsData.imei] = msg.gpsData;
 
                     if (msg.sectionPart) {
-                        solver.findBusRoute(msg.gpsData.imei, msg.sectionPart.section.id);
+                        try {
+                            solver.findBusRoute(msg.gpsData.imei, msg.sectionPart.section.id);
+                        }
+                        catch(e) {
+                            console.error(e.message);
+                        }
                     }
 
                     io.send({data: msg.gpsData, section_part: msg.sectionPart, routeSectionOrder: solver.routeSectionOrder});
