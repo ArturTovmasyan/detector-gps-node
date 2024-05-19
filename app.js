@@ -3,9 +3,8 @@
  */
 
 var cluster = require('cluster');
-var fs      = require('fs');
 var numCPUs = require('os').cpus().length;
-var logger  = require('./lib/logger');
+var log     = require('./lib/logger');
 var api     = require('./lib/api_controller');
 var gps     = require('./lib/gps_controller');
 var loader  = require('./lib/data_loader');
@@ -13,28 +12,6 @@ var param   = require('./config/parameters');
 
 var viewControl = require('./lib/view_controller');
 var io          = viewControl.get_socket();
-
-
-//=================================================================================================
-var db = require('./lib/gps_controller/db');
-
-db.getDataGroupedByIMEIs('02/03/2014', '05/03/2016', function(err, rows, fields) {
-
-    if (err) {
-        console.error('error during get data ' + err);
-    }
-    console.log(rows);
-});
-
-
-db.getDataGroupedByDates("356307042360734", '02/03/2015', '05/03/2015', function(err, rows, fields) {
-
-    if (err) {
-        console.error('error during get data ' + err);
-    }
-    console.log(rows);
-});
-//=================================================================================================
 
 
 
