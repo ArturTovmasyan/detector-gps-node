@@ -34,7 +34,7 @@ if (cluster.isMaster) {
                 {
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
 
-                    io.send({busInfo: msg.busInfo, routeSectionOrder: routeSectionOrder});
+                    io.send({busInfo: msg.busInfo});
                 }
             }
         });

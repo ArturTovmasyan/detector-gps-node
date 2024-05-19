@@ -63,9 +63,6 @@
                     var sectionPart = msg.busInfo.sectionPart;
                     var routeId     = msg.busInfo.routeId ? msg.busInfo.routeId.toString() : "";
 
-                    console.log(msg.routeSectionOrder);
-
-
                     if (bus_polylines[gpsData.imei]) {
                         bus_polylines[gpsData.imei].setOptions({strokeColor: '#FF0000'});
                     }
