@@ -1,5 +1,6 @@
 {
   "/api/get": {
-    "event": "hello"
+    "event": "hello",
+    "method": "GET"
   }
 }
