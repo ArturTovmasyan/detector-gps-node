@@ -36,32 +36,12 @@
     "ws": "0.7.1",
     "mysql": "^2.5.5",
     "chart.js": ">=1.0.2",
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "sequelize": "^2.0.5",
-<<<<<<< HEAD
-    "better-console": "^0.2.4"
-=======
-    "node-rest-client": "1.4.4"
->>>>>>> 6a517ff (node client)
-=======
-=======
     "sequelize": "^3.2.0",
->>>>>>> 1a58fa8 (mini correction)
     "better-console": "^0.2.4",
     "node-rest-client": "1.4.4",
-<<<<<<< HEAD
-    "object-sizeof": "1.0.0"
->>>>>>> 99886ed (mini corrections)
-=======
     "object-sizeof": "1.0.0",
-<<<<<<< HEAD
-    "memory-cache": "0.1.4"
->>>>>>> a554f1d (mem cache)
-=======
     "memory-cache": "0.1.4",
     "memwatch": "0.2.2"
->>>>>>> 689cc34 (add logging)
   },
   "dependencies": {
     "socket.io": "^1.3.5"
