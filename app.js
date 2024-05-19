@@ -57,7 +57,7 @@ if (cluster.isMaster){
 
                     if (msg.busInfo.statistic) {
                         for (var k in msg.busInfo.statistic.stopTimes) {
-                            kioskSocket.to('' + k).emit(msg.busInfo);
+                            kioskSocket.to('' + k).send(msg.busInfo);
                         }
                     }
 
@@ -67,9 +67,8 @@ if (cluster.isMaster){
         });
     }
 
-    sync.syncronize();
     setInterval(function(){
-        sync.syncronize();
+        //sync.syncronize();
         for(var imei in currentBusPositions){
             busInfo = currentBusPositions[imei];
             var currentDate = new Date();
