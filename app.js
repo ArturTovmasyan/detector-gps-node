@@ -118,7 +118,9 @@ else {
 }
 
 
-//This function is used to determine consecutive buses for the given bus
+/*************************************************************************
+* This function is used to determine consecutive buses for the given bus *
+**************************************************************************/
 function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
 
     var newBasInfo   = currentBusPositions[imei];
