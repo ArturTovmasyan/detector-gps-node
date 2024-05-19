@@ -32,6 +32,8 @@ if (cluster.isMaster) {
                 {
                     currentBusPositions[msg.busInfo.imei] = msg.busInfo;
 
+                    console.log("routeId: " + busInfo.routeId);
+                    console.log("sectionPart: " + busInfo.sectionPart);
                     console.log("process+++++++++++++++++++++++++++");
                     io.send({busInfo: msg.busInfo});
                 }
@@ -83,7 +85,6 @@ else {
     dataListener.on('data', function(busInfo) {
         process.send({busInfo: busInfo});
         console.log("worker*/************************");
-        console.log(busInfo.routeId);
     });
 }
 
