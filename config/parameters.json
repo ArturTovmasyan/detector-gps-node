@@ -1,0 +1,28 @@
+{
+  "api_controller": {
+    "port": 8000,
+    "urls": {
+      "/api/load_buses": {
+        "event": "load_buses",
+        "method": "GET"
+      },
+      "/api/load_routes": {
+        "event": "load_routes",
+        "method": "GET"
+      }
+    }
+  },
+
+  "gps_controller": {
+    "port": 3129
+  },
+
+  "express": {
+    "stop_port": 7777
+  },
+
+  "logger": {
+    "dev_path": "logs/",
+    "prod_path": "logs/"
+  }
+}

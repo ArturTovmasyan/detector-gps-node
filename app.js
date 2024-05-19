@@ -8,6 +8,7 @@ var logger  = require('./lib/logger');
 var api     = require('./lib/api_controller');
 var gps     = require('./lib/gps_controller');
 var loader  = require('./lib/data_loader');
+var param   = require('./config/parameters.json');
 
 var app = require('express')();
 var server = require('http').Server(app);
@@ -39,7 +40,7 @@ if (cluster.isMaster) {
         });
     }
 
-    server.listen(7777);
+    server.listen(param.express.stop_port);
 
     app.get('/', function (req, res) {
         res.sendfile(__dirname + '/lib/socket/socket.io.html');
@@ -51,7 +52,7 @@ if (cluster.isMaster) {
 
 
     //Start listen on 8000 port for incoming api requests
-    var apiEmitter = api.start(8000);
+    var apiEmitter = api.start(param.api_controller.port);
 
     //listen for incoming commands
     apiEmitter.on('load_buses', function() {
@@ -88,7 +89,7 @@ else {
     });
 
     //start listen for incoming requests from gps devices
-    var dataListener = gps.start(3129);
+    var dataListener = gps.start(param.gps_controller.port);
 
     //When get gps data send it to the master process
     dataListener.on('data', function(gpsData) {
