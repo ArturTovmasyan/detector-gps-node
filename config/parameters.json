@@ -48,6 +48,8 @@
     "start_latitude":            40.171613,
     "start_longitude":           44.538151,
     "LAT_LNG_OF_ONE_METER":      0.000011334405372488942,
-    "ALLOW_DEVIATION_BY_METERS": 30
+    "ALLOW_DEVIATION_BY_METERS": 30,
+    "TIME_TO_CHANGE_STATUS":     30,
+    "COLLECT_COUNT_FOR_ROUTE":   10
   }
 }
