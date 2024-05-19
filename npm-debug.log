@@ -1,0 +1,56 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/local/bin/npm', 'info', 'xpress' ]
+2 info using npm@1.4.28
+3 info using node@v0.12.0
+4 verbose node symlink /usr/bin/node
+5 verbose request where is /xpress
+6 verbose request registry https://registry.npmjs.org/
+7 verbose request id e51d0eee94886210
+8 verbose url raw /xpress
+9 verbose url resolving [ 'https://registry.npmjs.org/', './xpress' ]
+10 verbose url resolved https://registry.npmjs.org/xpress
+11 verbose request where is https://registry.npmjs.org/xpress
+12 info trying registry request attempt 1 at 5:08:00 PM
+13 http GET https://registry.npmjs.org/xpress
+14 http 404 https://registry.npmjs.org/xpress
+15 verbose headers { date: 'Wed, 11 Mar 2015 13:08:01 GMT',
+15 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+15 verbose headers   'content-type': 'application/json',
+15 verbose headers   'cache-control': 'max-age=0',
+15 verbose headers   'content-length': '52',
+15 verbose headers   'accept-ranges': 'bytes',
+15 verbose headers   via: '1.1 varnish',
+15 verbose headers   age: '0',
+15 verbose headers   'x-served-by': 'cache-fra1244-FRA',
+15 verbose headers   'x-cache': 'MISS',
+15 verbose headers   'x-cache-hits': '0',
+15 verbose headers   'x-timer': 'S1426079280.858214,VS0,VE168',
+15 verbose headers   connection: 'close' }
+16 silly registry.get cb [ 404,
+16 silly registry.get   { date: 'Wed, 11 Mar 2015 13:08:01 GMT',
+16 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+16 silly registry.get     'content-type': 'application/json',
+16 silly registry.get     'cache-control': 'max-age=0',
+16 silly registry.get     'content-length': '52',
+16 silly registry.get     'accept-ranges': 'bytes',
+16 silly registry.get     via: '1.1 varnish',
+16 silly registry.get     age: '0',
+16 silly registry.get     'x-served-by': 'cache-fra1244-FRA',
+16 silly registry.get     'x-cache': 'MISS',
+16 silly registry.get     'x-cache-hits': '0',
+16 silly registry.get     'x-timer': 'S1426079280.858214,VS0,VE168',
+16 silly registry.get     connection: 'close' } ]
+17 error 404 404 Not Found: xpress
+17 error 404
+17 error 404 'xpress' is not in the npm registry.
+17 error 404 You should bug the author to publish it
+17 error 404
+17 error 404 Note that you can also install from a
+17 error 404 tarball, folder, or http url, or git url.
+18 error System Linux 3.13.0-44-generic
+19 error command "/usr/bin/node" "/usr/local/bin/npm" "info" "xpress"
+20 error cwd /var/www/bus-nodejs
+21 error node -v v0.12.0
+22 error npm -v 1.4.28
+23 error code E404
+24 verbose exit [ 1, true ]
