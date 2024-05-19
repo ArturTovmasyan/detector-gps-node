@@ -34,7 +34,9 @@ if (cluster.isMaster) {
 
                     var sectionPart = null;
                     try {
-                        sectionPart = solver.findNearestSectionPart(msg.gpsData.data);
+                        sectionPart = solver.findNearestSectionPart({imei: msg.gpsData.data.imei,
+                                                                     latitude: msg.gpsData.data.latitude / 10000000,
+                                                                     longitude: msg.gpsData.data.longitude / 10000000});
                     }
                     catch(e) {
                         console.error(e.message);
