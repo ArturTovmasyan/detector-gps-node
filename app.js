@@ -5,12 +5,12 @@
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var log     = require('./lib/logger');
-var api     = require('./lib/api_controller');
-var gps     = require('./lib/gps_controller');
-var loader  = require('./lib/data_loader');
+var api     = require('./lib/api-controller');
+var gps     = require('./lib/gps-controller');
+var loader  = require('./lib/data-loader');
 var param   = require('./config/parameters');
 
-var viewControl = require('./lib/view_controller');
+var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
 
 
