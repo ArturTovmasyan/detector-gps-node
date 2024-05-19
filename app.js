@@ -35,16 +35,6 @@ var io          = viewControl.get_socket();
 
 if (cluster.isMaster){
 
-
-    var t = sync.syncronize();
-
-    console.log(t);
-    t.on('changes', function() {
-        console.error('there are changes');
-    });
-
-
-
     var kioskSocket = require('./lib/kiosk-socket').socketIo;
     var workers = [];
 
