@@ -22,7 +22,7 @@ if (cluster.isMaster) {
         workers[i].on('message', function(msg) {
             if (msg.gpsData) {
                 if (!currentBusPositions[msg.gpsData.IMEI] || currentBusPositions[msg.gpsData.IMEI].timestamp < msg.gpsData.data.timestamp) {
-                    currentBusPositions[data.gpsData.IMEI] = data.gpsData.data
+                    currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data
                 }
 
                 console.log(currentBusPositions);
