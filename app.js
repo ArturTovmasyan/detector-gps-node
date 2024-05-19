@@ -34,80 +34,6 @@ var io          = viewControl.get_socket();
 
  ***********************************************************************************************/
 
-
-function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
-
-    var newBasInfo   = currentBusPositions[imei];
-    var lineNumber   = newBasInfo.lineNumber;
-    var sectionOrder = newBasInfo.section_order;
-    var routeId      = newBasInfo.gpsData.route_id;
-
-    if (!lineNumber || !sectionOrder || !routeId){
-        return null;
-    }
-
-    if (!busesOrderInRoutes[lineNumber]){
-        busesOrderInRoutes[lineNumber] = {};
-    }
-
-    if (!busesOrderInRoutes[lineNumber][routeId]){
-        busesOrderInRoutes[lineNumber][routeId] = {};
-    }
-
-
-    //If there aren't data with such imei remove data with such imei from other routes
-    if (!busesOrderInRoutes[lineNumber][routeId][imei]){
-        for (var k in busesOrderInRoutes[lineNumber]){
-            var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
-
-            if (busesOrderInRoute[imei]){
-                if (newBasInfo.frontImei) {
-                    currentBusPositions[newBasInfo.frontImei].backImei = null;
-                }
-                if (newBasInfo.backImei) {
-                    currentBusPositions[newBasInfo.backImei].frontImei = null;
-                }
-
-                delete busesOrderInRoute[imei];
-            }
-        }
-    }
-
-    busesOrderInRoutes[lineNumber][routeId][imei] = sectionOrder;
-
-    var frontImei = null;
-    var backImei  = null;
-
-    //Determine front and back buses
-    var busOrdersInRoute =  busesOrderInRoutes[lineNumber][routeId];
-    for (var tempImei in busOrdersInRoute){
-        if (tempImei != imei){
-            if (busOrdersInRoute[tempImei] > busOrdersInRoute[imei] && (frontImei == null || busOrdersInRoute[tempImei] < busOrdersInRoute[frontImei])){
-                frontImei = tempImei;
-            }
-
-            if (busOrdersInRoute[tempImei] < busOrdersInRoute[imei] && (backImei == null || busOrdersInRoute[tempImei] > busOrdersInRoute[backImei])){
-                backImei = tempImei;
-            }
-        }
-    }
-
-
-    //Set front and back imeis and change bront and back imeis of front and back buses
-    newBasInfo.frontImei = frontImei;
-    newBasInfo.backImei  = backImei;
-
-    if (frontImei) {
-        currentBusPositions[frontImei].backImei = imei;
-    }
-
-    if (backImei) {
-        currentBusPositions[backImei].frontImei = imei;
-    }
-}
-
-
-
 if (cluster.isMaster){
 
     var workers = [];
@@ -189,4 +115,77 @@ else {
     dataListener.on('data', function(busInfo) {
         process.send({busInfo: busInfo});
     });
+}
+
+
+//This function is used to determine consecutive buses for the given bus
+function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
+
+    var newBasInfo   = currentBusPositions[imei];
+    var lineNumber   = newBasInfo.lineNumber;
+    var sectionOrder = newBasInfo.section_order;
+    var routeId      = newBasInfo.gpsData.route_id;
+
+    if (!lineNumber || !sectionOrder || !routeId){
+        return null;
+    }
+
+    if (!busesOrderInRoutes[lineNumber]){
+        busesOrderInRoutes[lineNumber] = {};
+    }
+
+    if (!busesOrderInRoutes[lineNumber][routeId]){
+        busesOrderInRoutes[lineNumber][routeId] = {};
+    }
+
+
+    //If there aren't data with such imei remove data with such imei from other routes
+    if (!busesOrderInRoutes[lineNumber][routeId][imei]){
+        for (var k in busesOrderInRoutes[lineNumber]){
+            var busesOrderInRoute = busesOrderInRoutes[lineNumber][k];
+
+            if (busesOrderInRoute[imei]){
+                if (newBasInfo.frontImei) {
+                    currentBusPositions[newBasInfo.frontImei].backImei = null;
+                }
+                if (newBasInfo.backImei) {
+                    currentBusPositions[newBasInfo.backImei].frontImei = null;
+                }
+
+                delete busesOrderInRoute[imei];
+            }
+        }
+    }
+
+    busesOrderInRoutes[lineNumber][routeId][imei] = sectionOrder;
+
+    var frontImei = null;
+    var backImei  = null;
+
+    //Determine front and back buses
+    var busOrdersInRoute =  busesOrderInRoutes[lineNumber][routeId];
+    for (var tempImei in busOrdersInRoute){
+        if (tempImei != imei){
+            if (busOrdersInRoute[tempImei] > busOrdersInRoute[imei] && (frontImei == null || busOrdersInRoute[tempImei] < busOrdersInRoute[frontImei])){
+                frontImei = tempImei;
+            }
+
+            if (busOrdersInRoute[tempImei] < busOrdersInRoute[imei] && (backImei == null || busOrdersInRoute[tempImei] > busOrdersInRoute[backImei])){
+                backImei = tempImei;
+            }
+        }
+    }
+
+
+    //Set front and back imeis and change bront and back imeis of front and back buses
+    newBasInfo.frontImei = frontImei;
+    newBasInfo.backImei  = backImei;
+
+    if (frontImei) {
+        currentBusPositions[frontImei].backImei = imei;
+    }
+
+    if (backImei) {
+        currentBusPositions[backImei].frontImei = imei;
+    }
 }
