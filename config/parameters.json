@@ -39,5 +39,11 @@
     "host": "http://bus.loc/app_dev.php",
     "vector_parts_ready_event": "vector_parts_ready_event",
     "lines_ready_event": "lines_ready_event"
+  },
+
+  "solver": {
+    "distance_coef": 109718.06,
+    "start_latitude": 40.171613,
+    "start_longitude": 44.538151
   }
 }
