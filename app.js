@@ -27,12 +27,12 @@ if (cluster.isMaster) {
         workers[i] = cluster.fork();
 
         workers[i].on('message', function(msg) {
-            if (msg.gpsData) {
-                if (!currentBusPositions[msg.gpsData.imei] || currentBusPositions[msg.gpsData.imei].timestamp < msg.gpsData.timestamp)
+            if (msg.busInfo) {
+                if (!currentBusPositions[msg.busInfo.imei] || currentBusPositions[msg.busInfo.imei].timestamp < msg.busInfo.timestamp)
                 {
-                    currentBusPositions[msg.gpsData.imei] = msg.gpsData;
+                    currentBusPositions[msg.busInfo.imei] = msg.busInfo;
 
-                    io.send({data: msg.gpsData, section_part: msg.sectionPart});
+                    io.send({busInfo: msg.busInfo});
                 }
             }
         });
@@ -79,8 +79,8 @@ else {
 
     var dataListener = solver.start();
 
-    dataListener.on('data', function(gpsData) {
-        process.send({gpsData: gpsData});
+    dataListener.on('data', function(busInfo) {
+        process.send({busInfo: busInfo});
     });
 }
 

@@ -59,13 +59,12 @@
                     console.log('socket disconnected...');
                 })
                 .on('message',function(msg){
-                    var data = msg.data;
-                    var section_part = msg.section_part;
+                    var data = msg.busInfo;
 
                     console.log(data);
 
                     //If there are section part and corresponding section's polyline select it
-                    if (section_part && polylines[section_part.section.id]) {
+                    if (data.sectionPart && polylines[data.sectionPart.section.id]) {
 
                         //Reselect last bus's polyline
                         if (bus_polylines[data.imei]) {
@@ -73,11 +72,11 @@
                         }
 
                         //Select corresponding polyline and save it in the bus_polylines object
-                        polylines[section_part.section.id].setOptions({strokeColor: 'blue'});
-                        bus_polylines[data.imei] = polylines[section_part.section.id];
+                        polylines[data.sectionPart.section.id].setOptions({strokeColor: 'blue'});
+                        bus_polylines[data.imei] = polylines[data.sectionPart.section.id];
 
                         //Create marker on the nearest section part center
-                        pos = new google.maps.LatLng(section_part.latitude, section_part.longitude);
+                        pos = new google.maps.LatLng(data.sectionPart.latitude, data.sectionPart.longitude);
                         if (bus_section_part_marker[data.imei]){
                             bus_section_part_marker[data.imei].setPosition(pos)
                         }
