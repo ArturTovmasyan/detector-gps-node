@@ -313,7 +313,7 @@ else {
 
 
 
- SELECT sp.id, (pairs.timeToPass / 10)
+ SELECT pairs.fromSectionPart, pairs.toSectionPart, sp.id, pairs.timeToPass
  FROM `bus-way`.section_part as sp
  JOIN `bus-way`.section as s ON s.id = sp.section_id
  JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
@@ -410,5 +410,271 @@ else {
  AND CAST(pairs.fromSectionPart AS SIGNED) * pairs.minIsAsc <= sp.id * pairs.minIsAsc))
 
  AND rs.route_id = pairs.routeId
+
+
+
+
+****************************************************************************************************************************
+
+
+
+
+
+
+
+ DROP PROCEDURE IF EXISTS statistic;
+ DELIMITER $$
+ CREATE PROCEDURE statistic (count INT, offset INT, modeId INT, minId INT, maxId INT)
+     BEGIN
+
+
+
+     DROP TABLE IF EXISTS tblResults;
+     CREATE TABLE IF NOT EXISTS tblResults  (
+         fromSectionPart INT,
+         toSectionPart INT,
+         intermediate_section_part_id INT,
+         interval_to_pass FLOAT
+     );
+
+
+
+     INSERT tblResults (fromSectionPart, toSectionPart, intermediate_section_part_id, interval_to_pass)
+                         SELECT pairs.fromSectionPart, pairs.toSectionPart, sp.id, pairs.timeToPass
+                         FROM `bus-way`.section_part as sp
+                         JOIN `bus-way`.section as s ON s.id = sp.section_id
+                         JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
+
+
+                         JOIN (SELECT
+
+                         CASE
+                         WHEN (rs1.section_order < rs2.section_order)
+                         THEN i1.section_part_id
+                         ELSE i2.section_part_id
+                         END as fromSectionPart,
+
+                         CASE
+                         WHEN (rs1.section_order < rs2.section_order)
+                         THEN rs1.section_order
+                         ELSE rs2.section_order
+                         END as fromSectionOrder,
+
+                         CASE
+                         WHEN (rs1.section_order < rs2.section_order)
+                         THEN i2.section_part_id
+                         ELSE i1.section_part_id
+                         END as toSectionPart,
+
+                         CASE
+                         WHEN (rs1.section_order < rs2.section_order)
+                         THEN rs2.section_order
+                         ELSE rs1.section_order
+                         END as toSectionOrder,
+
+                         isAsc(CASE
+                         WHEN (rs1.section_order < rs2.section_order)
+                         THEN i1.section_part_id
+                         ELSE i2.section_part_id
+                         END,
+                         i1.route_id) as minIsAsc,
+
+                         isAsc(CASE
+                         WHEN (rs1.section_order < rs2.section_order)
+                         THEN i2.section_part_id
+                         ELSE i1.section_part_id
+                         END,
+                         i1.route_id) as maxIsAsc,
+
+
+                         (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id as routeId
+
+                         FROM bus_nodejs.gps_info as i1
+
+
+                         JOIN bus_nodejs.gps_info as i2
+                         ON  i1.imei = i2.imei
+                         AND i2.timestamp > i1.timestamp
+                         AND i1.route_id = i2.route_id
+                         AND NOT EXISTS (SELECT *
+                         FROM bus_nodejs.gps_info as i3
+                         WHERE i1.imei = i3.imei
+                         AND i1.route_id = i3.route_id
+                         AND i3.timestamp > i1.timestamp
+                         AND i3.timestamp < i2.timestamp)
+
+                         JOIN `bus-way`.section_part as sp1 ON sp1.id = i1.section_part_id
+                         JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = i1.route_id
+
+                         JOIN `bus-way`.section_part as sp2 ON sp2.id = i2.section_part_id
+                         JOIN `bus-way`.route_section as rs2 ON rs2.section_id = sp2.section_id AND rs2.route_id = i1.route_id
+
+
+                         JOIN `bus-way`.statistic_mode as sm ON sm.id = modeId
+                         JOIN `bus-way`.hour_type as ht ON ht.id = sm.hour_type_id
+                         JOIN `bus-way`.hour_interval as hi ON hi.hour_type_id = ht.id
+
+                         WHERE i1.route_id IS NOT NULL
+                         AND i1.id > minId AND i1.id < maxId
+                         AND ((sm.week_day_from <= sm.week_day_to AND sm.week_day_from <= DAYOFWEEK(i1.timestamp) AND sm.week_day_to >= DAYOFWEEK(i1.timestamp))
+                         OR (sm.week_day_from > sm.week_day_to AND (sm.week_day_from <= DAYOFWEEK(i1.timestamp) OR sm.week_day_to >= DAYOFWEEK(i1.timestamp))))
+                         AND   ((sm.month_from <= sm.month_to AND sm.month_from <= MONTH(i1.timestamp) AND sm.month_to >= MONTH(i1.timestamp))
+                         OR (sm.month_from > sm.month_to AND (sm.month_from <= MONTH(i1.timestamp) OR sm.month_to >= MONTH(i1.timestamp))))
+                         AND   ((hi.time_from <= hi.time_to AND hi.time_from <= TIME(i1.timestamp) AND hi.time_to >= TIME(i1.timestamp))
+                         OR (hi.time_from > hi.time_to AND (hi.time_from <= TIME(i1.timestamp) OR hi.time_to >= TIME(i1.timestamp))))
+
+                         LIMIT offset, count) as pairs ON TRUE
+
+
+                         WHERE ((rs.section_order > pairs.fromSectionOrder AND rs.section_order < pairs.toSectionOrder)
+                         OR (rs.section_order = pairs.fromSectionOrder AND pairs.fromSectionOrder != pairs.toSectionOrder
+                         AND CAST(pairs.fromSectionPart AS SIGNED) * pairs.minIsAsc <= sp.id * pairs.minIsAsc)
+
+                         OR (rs.section_order = pairs.toSectionOrder AND pairs.fromSectionOrder != pairs.toSectionOrder
+                         AND CAST(pairs.toSectionPart AS SIGNED) * pairs.maxIsAsc >= sp.id * pairs.maxIsAsc)
+
+                         OR (rs.section_order = pairs.toSectionOrder AND pairs.fromSectionOrder = pairs.toSectionOrder
+                         AND CAST(pairs.toSectionPart AS SIGNED) * pairs.maxIsAsc >= sp.id * pairs.maxIsAsc
+                         AND CAST(pairs.fromSectionPart AS SIGNED) * pairs.minIsAsc <= sp.id * pairs.minIsAsc))
+
+                         AND rs.route_id = pairs.routeId;
+
+
+
+
+
+     UPDATE tblResults as t1
+     JOIN (SELECT fromSectionPart, toSectionPart, COUNT(fromSectionPart) as cnt FROM tblResults GROUP BY fromSectionPart, toSectionPart) as cnt
+     ON cnt.fromSectionPart = t1.fromSectionPart AND cnt.toSectionPart = t1.toSectionPart
+     SET t1.interval_to_pass = (t1.interval_to_pass / cnt.cnt);
+
+     SELECT * FROM tblResults;
+
+ END; $$
+ DELIMITER ;
+
+
+
+
+***********************************************************************************************************************
+
+ DROP TRIGGER IF EXISTS `AFTER_gps_info_statistic_INSERT`
+ DELIMITER $$;
+ CREATE TRIGGER AFTER_gps_info_statistic_INSERT AFTER INSERT
+ ON gps_info FOR EACH ROW
+ BEGIN
+
+     DECLARE fromSectionPart INT;
+     DECLARE fromSectionOrder INT;
+
+     DECLARE toSectionPart INT;
+     DECLARE toSectionOrder INT;
+
+     DECLARE timeToPass FLOAT;
+     DECLARE routeId INT;
+
+     DECLARE minIsAsc INT;
+     DECLARE maxIsAsc INT;
+
+     DECLARE temp INT;
+
+     DECLARE lastInfoId INT;
+
+
+     SET routeId = NEW.route_id;
+
+     SET lastInfoId = (SELECT b.last_record_id
+                       FROM bus_last_info_id as b
+                       JOIN gps_info as i ON i.id = b.last_record_id AND i.route_id = routeId
+                       WHERE b.imei = NEW.imei);
+
+     IF (lastInfoId IS NOT NULL) THEN
+
+         SET fromSectionPart = (SELECT i.section_part_id
+                                FROM gps_info as i
+                                WHERE i.id = lastInfoId);
+
+         SET fromSectionOrder = (SELECT rs.section_order
+                                 FROM `bus-way`.route_section as rs
+                                 JOIN `bus-way`.section_part as sp ON sp.section_id = rs.section_id
+                                                            AND rs.route_id = routeId
+                                                            AND sp.id = fromSectionPart);
+
+
+         SET toSectionPart = NEW.section_part_id;
+         SET toSectionOrder  =  (SELECT rs.section_order
+                                 FROM `bus-way`.route_section as rs
+                                 JOIN `bus-way`.section_part as sp ON sp.section_id = rs.section_id
+                                                            AND rs.route_id = routeId
+                                                            AND sp.id = toSectionPart);
+
+
+         IF (fromSectionOrder > toSectionOrder) THEN
+            SET temp = fromSectionOrder;
+            SET fromSectionOrder = toSectionOrder;
+            SET toSectionOrder = temp;
+
+            SET temp = fromSectionPart;
+            SET fromSectionPart = toSectionPart;
+            SET toSectionPart = temp;
+         END IF;
+
+
+         SET timeToPass = (SELECT abs(NEW.timestamp - i.timestamp)
+                           FROM gps_info as i
+                           WHERE i.id = lastInfoId);
+
+
+         SET minIsAsc = isAsc(fromSectionPart, routeId);
+         SET maxIsAsc = isAsc(toSectionPart, routeId);
+
+
+
+         INSERT statistic (section_part_id, interval_to_pass)
+                 SELECT sp.id, (timeToPass / data.cnt)
+                 FROM `bus-way`.section_part as sp
+                 JOIN `bus-way`.section as s ON s.id = sp.section_id
+                 JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
+
+
+                 # Used to calculate the count of passed section parts
+                 JOIN (SELECT COUNT(*) as cnt
+                       FROM `bus-way`.section_part as sp
+                       JOIN `bus-way`.section as s ON s.id = sp.section_id
+                       JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
+                       WHERE ((rs.section_order > fromSectionOrder AND rs.section_order < toSectionOrder)
+                       OR (rs.section_order = fromSectionOrder AND fromSectionOrder != toSectionOrder
+                       AND CAST(fromSectionPart AS SIGNED) * minIsAsc <= sp.id * minIsAsc)
+                       OR (rs.section_order = toSectionOrder AND fromSectionOrder != toSectionOrder
+                       AND CAST(toSectionPart AS SIGNED) * maxIsAsc >= sp.id * maxIsAsc)
+                       OR (rs.section_order = toSectionOrder AND fromSectionOrder = toSectionOrder
+                       AND CAST(toSectionPart AS SIGNED) * maxIsAsc >= sp.id * maxIsAsc
+                       AND CAST(fromSectionPart AS SIGNED) * minIsAsc <= sp.id * minIsAsc))
+                       AND rs.route_id = routeId) as data ON TRUE
+
+                 WHERE ((rs.section_order > fromSectionOrder AND rs.section_order < toSectionOrder)
+                 OR (rs.section_order = fromSectionOrder AND fromSectionOrder != toSectionOrder
+                 AND CAST(fromSectionPart AS SIGNED) * minIsAsc <= sp.id * minIsAsc)
+
+                 OR (rs.section_order = toSectionOrder AND fromSectionOrder != toSectionOrder
+                 AND CAST(toSectionPart AS SIGNED) * maxIsAsc >= sp.id * maxIsAsc)
+
+                 OR (rs.section_order = toSectionOrder AND fromSectionOrder = toSectionOrder
+                 AND CAST(toSectionPart AS SIGNED) * maxIsAsc >= sp.id * maxIsAsc
+                 AND CAST(fromSectionPart AS SIGNED) * minIsAsc <= sp.id * minIsAsc))
+
+                 AND rs.route_id = routeId;
+
+     END IF;
+
+     INSERT INTO bus_last_info_id (imei,last_record_id)
+         VALUES (NEW.imei, NEW.id)
+         ON DUPLICATE KEY UPDATE
+         last_record_id = VALUES(last_record_id);
+
+ END $$;
+ DELIMITER ;
+
+
 
  */
