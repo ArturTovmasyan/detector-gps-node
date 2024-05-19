@@ -28,9 +28,9 @@ if (cluster.isMaster) {
 
         workers[i].on('message', function(msg) {
             if (msg.busInfo) {
-                if (!currentBusPositions[msg.busInfo.imei] || currentBusPositions[msg.busInfo.imei].timestamp < msg.busInfo.timestamp)
+                if (!currentBusPositions[msg.busInfo.gpsData.imei] || currentBusPositions[msg.busInfo.gpsData.imei].gpsData.timestamp < msg.busInfo.gpsData.timestamp)
                 {
-                    currentBusPositions[msg.busInfo.imei] = msg.busInfo;
+                    currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
 
                     console.log("routeId: " + msg.busInfo.routeId);
                     console.log("sectionPart: " + msg.busInfo.sectionPart);
