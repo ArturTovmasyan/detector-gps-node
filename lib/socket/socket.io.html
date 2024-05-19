@@ -45,8 +45,7 @@
                         markers[data.IMEI] = marker;
                     }
                     else {
-                        var marker = markers[data.IMEI];
-                        marker.setPosition(new google.maps.LatLng(data.latitude / 10000000,data.longitude / 10000000));
+                        markers[data.IMEI].setPosition(new google.maps.LatLng(data.latitude / 10000000,data.longitude / 10000000));
                     }
                 });
         });
