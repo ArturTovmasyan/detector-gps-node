@@ -42,11 +42,12 @@ if (cluster.isMaster) {
                     }
 
                     if (solver.routeSectionOrder[msg.gpsData.imei]) {
-                        solver.routeSectionOrder[msg.gpsData.imei].forEach(function (value, key) {
-                            if (solver.isApproximatelyRising(value)) {
+                        for (var key in solver.routeSectionOrder[msg.gpsData.imei]){
+                            var routeSectionOrder = solver.routeSectionOrder[msg.gpsData.imei];
+                            if (solver.isApproximatelyRising(routeSectionOrder[key])) {
                                 msg.gpsData.routeId = key;
                             }
-                        });
+                        }
                     }
 
                     io.send({data: msg.gpsData, section_part: msg.sectionPart, routeSectionOrder: solver.routeSectionOrder});
