@@ -32,6 +32,7 @@ if (cluster.isMaster) {
                 {
                     currentBusPositions[msg.busInfo.imei] = msg.busInfo;
 
+                    console.log(msg.busInfo.sectionPart);
                     io.send({busInfo: msg.busInfo});
                 }
             }

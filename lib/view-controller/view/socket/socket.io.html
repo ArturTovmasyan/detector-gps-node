@@ -61,7 +61,7 @@
                 .on('message',function(msg){
                     var data = msg.busInfo;
 
-                    console.log(data);
+                    console.log(data.sectionPart);
 
                     //If there are section part and corresponding section's polyline select it
                     if (data.sectionPart && polylines[data.sectionPart.section.id]) {
