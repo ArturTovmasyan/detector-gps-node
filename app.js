@@ -56,6 +56,6 @@ else {
     });
 
     //start listen for incoming requests from gps devices
-    gps.start(50000);
+    gps.start(3129);
 }
 
