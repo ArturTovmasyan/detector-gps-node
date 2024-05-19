@@ -97,10 +97,15 @@
 
                     var busIcon = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
                     if (msg.busInfo.busStatus == "on_line"){
-                        busIcon = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                        if (routeId == 1){
+                            busIcon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+                        }
+                        else if (routeId == 2){
+                            busIcon = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                        }
                     }
                     else if (msg.busInfo.busStatus == "no_data"){
-                        busIcon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+                        busIcon = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
                     }
 
 
