@@ -97,6 +97,27 @@ else {
 
 /*
 
+ SELECT i1.section_part_id as fromSectionPart, (SELECT i2.section_part_id
+ FROM bus_nodejs.gps_info as i2
+ WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as toSectionPart,
+ i1.route_id,
+ (SELECT i2.timestamp
+ FROM bus_nodejs.gps_info as i2
+ WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as timestamp
+
+ FROM bus_nodejs.gps_info as i1
+ WHERE i1.route_id IS NOT NULL
+
+
+ LIMIT 1000
+
+
+
+
+
+
+
+
 
  DROP FUNCTION IF EXISTS isAsc;
  DELIMITER $$
@@ -130,12 +151,18 @@ else {
  CREATE PROCEDURE statistic (count INT, offset INT, modeId INT)
  BEGIN
 
+    DECLARE timeFrom TIME DEFAULT CURRENT_TIME();
+
     DECLARE done1 INT;
 
     DECLARE sectionPartId1 INT;
     DECLARE sectionPartId2 INT;
     DECLARE timeToPass FLOAT;
     DECLARE routeId INT;
+
+
+    DECLARE minIsAsc INT;
+    DECLARE maxIsAsc INT;
 
     DECLARE minSectionOrder INT;
     DECLARE maxSectionOrder INT;
@@ -145,31 +172,29 @@ else {
     DECLARE allCount INT;
 
     # To get all consecutive section parts in given route
-    DECLARE curs1 CURSOR FOR  SELECT i1.section_part_id as fromSectionPart, i2.section_part_id as toSectionPart,
-                             (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id
+    DECLARE curs1 CURSOR FOR  SELECT i1.section_part_id as fromSectionPart,
+
+                             (SELECT i2.section_part_id
+                             FROM bus_nodejs.gps_info as i2
+                             WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as toSectionPart,
+                             (SELECT i2.timestamp - i1.timestamp
+                             FROM bus_nodejs.gps_info as i2
+                             WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as timestamp,
+                             i1.route_id
 
                              FROM bus_nodejs.gps_info as i1
-                             JOIN bus_nodejs.gps_info as i2
-                                 ON  i1.imei = i2.imei
-                                 AND i2.timestamp > i1.timestamp
-                                 AND i1.route_id = i2.route_id
-                                 AND NOT EXISTS (SELECT *
-                                                 FROM bus_nodejs.gps_info as i3
-                                                 WHERE i1.imei = i3.imei
-                                                 AND i1.route_id = i3.route_id
-                                                 AND i3.timestamp > i1.timestamp
-                                                 AND i3.timestamp < i2.timestamp)
 
                              JOIN `bus-way`.statistic_mode as sm ON sm.id = modeId
                              JOIN `bus-way`.hour_type as ht ON ht.id = sm.hour_type_id
                              JOIN `bus-way`.hour_interval as hi ON hi.hour_type_id = ht.id
 
-                             WHERE ((sm.week_day_from <= sm.week_day_to AND sm.week_day_from <= DAYOFWEEK(i1.timestamp) AND sm.week_day_to >= DAYOFWEEK(i1.timestamp))
-                             OR (sm.week_day_from > sm.week_day_to AND (sm.week_day_from <= DAYOFWEEK(i1.timestamp) OR sm.week_day_to >= DAYOFWEEK(i1.timestamp))))
+                             WHERE i1.route_id IS NOT NULL
+                             AND ((sm.week_day_from <= sm.week_day_to AND sm.week_day_from <= DAYOFWEEK(i1.timestamp) AND sm.week_day_to >= DAYOFWEEK(i1.timestamp))
+                                 OR (sm.week_day_from > sm.week_day_to AND (sm.week_day_from <= DAYOFWEEK(i1.timestamp) OR sm.week_day_to >= DAYOFWEEK(i1.timestamp))))
                              AND   ((sm.month_from <= sm.month_to AND sm.month_from <= MONTH(i1.timestamp) AND sm.month_to >= MONTH(i1.timestamp))
-                             OR (sm.month_from > sm.month_to AND (sm.month_from <= MONTH(i1.timestamp) OR sm.month_to >= MONTH(i1.timestamp))))
+                                 OR (sm.month_from > sm.month_to AND (sm.month_from <= MONTH(i1.timestamp) OR sm.month_to >= MONTH(i1.timestamp))))
                              AND   ((hi.time_from <= hi.time_to AND hi.time_from <= TIME(i1.timestamp) AND hi.time_to >= TIME(i1.timestamp))
-                             OR (hi.time_from > hi.time_to AND (hi.time_from <= TIME(i1.timestamp) OR hi.time_to >= TIME(i1.timestamp))))
+                                 OR (hi.time_from > hi.time_to AND (hi.time_from <= TIME(i1.timestamp) OR hi.time_to >= TIME(i1.timestamp))))
 
                              LIMIT offset, count;
 
@@ -211,6 +236,10 @@ else {
             SET maxSectionPartId = temp;
         END IF;
 
+        SET minIsAsc = isAsc(minSectionPartId, routeId);
+        SET maxIsAsc = isAsc(maxSectionPartId, routeId);
+
+
         # To get all count of section parts between given section parts in the given route
         SET allCount  = (SELECT COUNT(sp.id)
                          FROM `bus-way`.section_part as sp
@@ -219,16 +248,14 @@ else {
 
                          WHERE ((rs.section_order > minSectionOrder AND rs.section_order < maxSectionOrder)
                          OR (rs.section_order = minSectionOrder AND minSectionOrder != maxSectionOrder
-                         AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId))
-
+                             AND minSectionPartId * minIsAsc <= sp.id * minIsAsc)
 
                          OR (rs.section_order = maxSectionOrder AND minSectionOrder != maxSectionOrder
-                         AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId))
-
+                             AND maxSectionPartId * maxIsAsc >= sp.id * maxIsAsc)
 
                          OR (rs.section_order = maxSectionOrder AND minSectionOrder = maxSectionOrder
-                         AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId)
-                         AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId)))
+                             AND maxSectionPartId * maxIsAsc >= sp.id * maxIsAsc
+                             AND minSectionPartId * minIsAsc <= sp.id * minIsAsc))
 
                          AND rs.route_id = routeId);
 
@@ -241,22 +268,20 @@ else {
 
                              WHERE ((rs.section_order > minSectionOrder AND rs.section_order < maxSectionOrder)
                              OR (rs.section_order = minSectionOrder AND minSectionOrder != maxSectionOrder
-                                 AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId))
-
+                                 AND minSectionPartId * minIsAsc <= sp.id * minIsAsc)
 
                              OR (rs.section_order = maxSectionOrder AND minSectionOrder != maxSectionOrder
-                                 AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId))
-
+                                 AND maxSectionPartId * maxIsAsc >= sp.id * maxIsAsc)
 
                              OR (rs.section_order = maxSectionOrder AND minSectionOrder = maxSectionOrder
-                                 AND maxSectionPartId * isAsc(maxSectionPartId, routeId) >= sp.id * isAsc(maxSectionPartId, routeId)
-                                 AND minSectionPartId * isAsc(minSectionPartId, routeId) <= sp.id * isAsc(minSectionPartId, routeId)))
+                                 AND maxSectionPartId * maxIsAsc >= sp.id * maxIsAsc
+                                 AND minSectionPartId * minIsAsc <= sp.id * minIsAsc))
 
                              AND rs.route_id = routeId;
     UNTIL done1 END REPEAT;
     CLOSE curs1;
 
-    SELECT * FROM tblResults;
+    SELECT timeFrom as time_from, CURRENT_TIME() as time_to, intermediate_section_part_id, SUM(interval_to_pass) / COUNT(interval_to_pass) FROM tblResults GROUP BY intermediate_section_part_id;
 
  END; $$
  DELIMITER ;
