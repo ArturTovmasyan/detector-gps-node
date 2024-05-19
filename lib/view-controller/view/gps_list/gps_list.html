@@ -39,11 +39,11 @@
                             <td><input type="text" ng-model="tableFilter.imei" class="form-control" placeholder="IMEI"/></td>
                             <td><input type="number" ng-model="tableFilter.plate_number" class="form-control" placeholder="Plate Number"/></td>
                             <td><input type="number" ng-model="tableFilter.line_number" class="form-control" placeholder="Line Number"/></td>
-                            <td><input type="text" ng-model="tableFilter.timestamp" class="form-control" placeholder="Lats Date"/></td>
+                            <td><input type="text" ng-model="date" class="form-control" placeholder="Lats Date"/></td>
                         </tr>
                     </thead>
                     <tbody class="table-striped">
-                        <tr ng-repeat="g in gps | filter:tableFilter">
+                        <tr ng-repeat="g in gps | filter:tableFilter | filter:filterByDate">
                             <td ng-bind="$index+1"></td>
                             <td ng-bind="g.imei"></td>
                             <td ng-bind="g.plate_number"></td>
