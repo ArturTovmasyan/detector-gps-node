@@ -37,6 +37,7 @@
 
   "loader": {
     "host": "http://bus.loc/app_dev.php",
-    "vector_parts_ready_event": "vector_parts_ready_event"
+    "vector_parts_ready_event": "vector_parts_ready_event",
+    "lines_ready_event": "lines_ready_event"
   }
 }
