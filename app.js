@@ -206,6 +206,6 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
         }
     }
     catch (e) {
-        console.error(e.message);
+        //console.error(e.message);
     }
 }
