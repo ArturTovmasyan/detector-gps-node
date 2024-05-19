@@ -71,7 +71,5 @@
     "bulkSaveCount": 50
   },
 
-  "data_resend_info": {
-    "1": {"host": "10.10.7.12", "port": 3129}
-  }
+  "data_resend_info": {}
 }

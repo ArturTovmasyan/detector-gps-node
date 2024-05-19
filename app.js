@@ -93,12 +93,13 @@ if (cluster.isMaster){
         io.send(currentBusPositions);
     });
 
-    var syncListener = sync.syncronize();
-    syncListener.on('changes', function() {
-        for(var k in workers){
-            workers[k].send('reload');
-        }
-    });
+    //TODO: will open
+    //var syncListener = sync.syncronize();
+    //syncListener.on('changes', function() {
+    //    for(var k in workers){
+    //        workers[k].send('reload');
+    //    }
+    //});
 
     //Api controller
     api.start(param.api_controller.port, null, console.log)
