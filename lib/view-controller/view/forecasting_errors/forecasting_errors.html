@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Buses (GPS) List</title>
+    <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/css/html5-reset.css" rel="stylesheet"/>
+    <link href="/css/style.css" rel="stylesheet"/>
+    <style>
+        table td {
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body style="background: url('/images/bgnoise_lg.png') repeat left top;" ng-app="Errors" ng-controller="ErrorsController">
+<div id="container" class="menu" style="width: 300px">
+    <!-- begin navigation -->
+    <nav id="navigation" style="position: absolute;z-index: 100;margin-top: 10px;margin-left: 10px">
+        <ul>
+            <li><a href="/">Map</a></li>
+            <li><a href="/chart">Chart</a></li>
+            <li><a href="/gps_list">GPS List</a></li>
+            <li><a href="/error_list">Errors List</a></li>
+        </ul>
+    </nav>
+    <!-- end navigation -->
+
+    <div class="table-container">
+        <table class="table table-bordered" style="margin-left: 400px">
+            <thead>
+            <tr>
+                <td>#</td>
+                <th>Line Number</th>
+                <th>Date</th>
+                <th>Alg1 error</th>
+                <th>Alg2 error</th>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" ng-model="tableFilter.line_number" class="form-control" placeholder="Line Number"/></td>
+                <td><input type="text" ng-model="date" class="form-control" placeholder="Date"/></td>
+                <td></td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody class="table-striped">
+            <tr ng-repeat="e in errors | filter:tableFilter | filter:filterByDate">
+                <td ng-bind="$index+1"></td>
+                <td ng-bind="e.line_number"></td>
+                <td>{{ e.date | date:"dd/MM/yyyy" }}</td>
+                <td ng-bind="e.alg1_error"></td>
+                <td ng-bind="e.alg2_error"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="/angular/angular.min.js"></script>
+<script type="text/javascript" src="/js/errors.js"></script>
+</body>
+</html>
