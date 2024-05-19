@@ -32,7 +32,13 @@ if (cluster.isMaster) {
                     currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data;
                     msg.gpsData.data.IMEI = msg.gpsData.IMEI;
 
-                    var sectionPart = solver.findNearestSectionPart(msg.gpsData.data);
+                    var sectionPart = null;
+                    try {
+                        sectionPart = solver.findNearestSectionPart(msg.gpsData.data);
+                    }
+                    catch(e) {
+                        console.error(e.message);
+                    }
 
                     io.send({data: msg.gpsData.data, section_part: sectionPart});
                     //TODO: need to send by socket to the map currentBusPositions or only msg.gpsData
