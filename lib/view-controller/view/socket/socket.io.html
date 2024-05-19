@@ -68,7 +68,7 @@
                         bus_polylines[gpsData.imei].setOptions({strokeColor: '#FF0000'});
                     }
 
-                    if (bus_section_part_marker[gpsData.imei]){
+                    if (!sectionPart && bus_section_part_marker[gpsData.imei]){
                         bus_section_part_marker[gpsData.imei].setMap(null);
                     }
 
