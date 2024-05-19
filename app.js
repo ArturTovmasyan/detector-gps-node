@@ -6,10 +6,12 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var log     = require('./lib/logger');
 var loader  = require('./lib/data-loader');
+var loader1 = require('./lib/data-loader/loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 var sync    = require('./lib/synchronizer');
 var stat    = require('./lib/statistic');
+var api     = require('./lib/api-controller');
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
@@ -79,11 +81,18 @@ if (cluster.isMaster){
     });
 
     var syncListener = sync.syncronize();
-
     syncListener.on('changes', function() {
         for(var k in workers){
             workers[k].send('reload');
         }
+    });
+
+    //Api controller
+    api.start(param.api_controller.port, null, console.log)
+        .on('load_buses', function(){
+            for(var k in workers){
+                workers[k].send('load_buses');
+            }
     });
 
     setInterval(function(){
@@ -102,6 +111,7 @@ if (cluster.isMaster){
 }
 else {
 
+    loader.setStatisticModeLoadingInterval(3600000);
     var dataListener = solver.start();
 
     dataListener.on('data', function(busInfo) {
@@ -109,9 +119,12 @@ else {
     });
 
     process.on('message', function(msg) {
-       if (msg == 'reload'){
-           loader.reload();
-       }
+        if (msg == 'reload'){
+            loader.reload();
+        }
+        if (msg == 'load_buses'){
+            loader1.loadBuses();
+        }
     });
 }
 
