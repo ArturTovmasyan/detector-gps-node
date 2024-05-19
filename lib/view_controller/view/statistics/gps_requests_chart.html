@@ -6,8 +6,8 @@
     </head>
     <body>
         <div>
-            <select>
-                <option>ALL IMEI</option>
+            <select id="imei">
+                <option value="0">ALL IMEI</option>
             </select>
             <label for="from">From</label>
             <input id="from" type="date"/>
@@ -20,35 +20,72 @@
         <script type="text/javascript" src="/chart.js/Chart.min.js"></script>
         <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
         <script type="text/javascript">
-            var ctx = document.getElementById("chart").getContext("2d");
-            Chart.defaults.global.scaleLineColor = "rgba(0,0,0,.2)";
+            $(document).ready(function(){
+                var chart = null;
 
-            $.ajax({
-                method: "POST",
-                url: "/api/charts_data",
-                data: {}
-            }).done(function(msg) {
-                console.log(msg)
-            });
-            var data = {
-                labels: ["January", "February", "March", "April", "May", "June", "July"],
-                datasets: [
-                    {
-                        label: "My First dataset",
-                        fillColor: "rgba(229, 70, 0, 0.5)",
-                        highlightFill: "rgba(189, 36, 0, 0.5)",
-                        data: [65, 59, 80, 81, 56, 55, 40]
-                    },
-                    {
-                        label: "My Second dataset",
-                        fillColor: "rgba(26, 145, 32, 0.5)",
-                        highlightFill: "rgba(4, 97, 8, 0.5)",
-                        data: [28, 48, 40, 19, 86, 27, 90]
+                function setChartData(data){
+                    var labels  = [];
+                    var bad     = [];
+                    var ok      = [];
+
+                    $("#imei").children().remove();
+
+                    for(var i = 0; i < data.length; i++){
+                        labels.push(data[i].imei);
+                        $("#imei").append("<option value='"+data[i].imei+"'>"+data[i].imei+"</option>");
+
+                        bad.push(data[i].allCount-data[i].okCount);
+                        ok.push(data[i].okCount);
                     }
-                ]
-            };
-            var myNewChart = new Chart(ctx).Bar(data, {
-                barShowStroke: false
+
+                    return {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "My First dataset",
+                                fillColor: "rgba(229, 70, 0, 0.5)",
+                                highlightFill: "rgba(189, 36, 0, 0.5)",
+                                data: bad
+                            },
+                            {
+                                label: "My Second dataset",
+                                fillColor: "rgba(26, 145, 32, 0.5)",
+                                highlightFill: "rgba(4, 97, 8, 0.5)",
+                                data: ok
+                            }
+                        ]
+                    };
+                }
+
+                function updateChart(data){
+                    console.log(data);
+                    var ctx = document.getElementById("chart").getContext("2d");
+                    Chart.defaults.global.scaleLineColor = "rgba(0,0,0,.2)";
+                    
+                    if(!chart){
+                        var d = setChartData(data);
+                        chart = new Chart(ctx).Bar(d, {
+                            barShowStroke: false
+                        });
+                    }
+                    else {
+                        chart.destroy();
+                        var d = setChartData(data);
+                        chart = new Chart(ctx).Bar(d, {
+                            barShowStroke: false
+                        });
+                    }
+                }
+
+                function rest(){
+                    $.ajax({
+                        method: "POST",
+                        url: "/api/charts_data",
+                        data: {from: $("#from").val(), to: $("#to").val(), imei: $("#imei").val()}
+                    }).done(updateChart);
+                }
+
+                rest();
             });
         </script>
     </body>
