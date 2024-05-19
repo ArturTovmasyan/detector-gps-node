@@ -3,17 +3,34 @@
     <head lang="en">
         <meta charset="UTF-8">
         <title>GPS Requests Charts</title>
+        <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="/css/html5-reset.css" rel="stylesheet"/>
+        <link href="/css/style.css" rel="stylesheet"/>
     </head>
-    <body>
-        <div>
-            <select id="imei">
+    <body style="background: url('/images/bgnoise_lg.png') repeat left top;">
+        <div id="container" class="menu" style="width: 300px">
+            <!-- begin navigation -->
+            <nav id="navigation" style="position: absolute;z-index: 100;margin-top: 10px;">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/map">Map</a></li>
+                    <li><a href="/chart">Chart</a></li>
+                </ul>
+            </nav>
+            <!-- end navigation -->
+        </div>
+
+        <div style="float: right">
+            <select class="selectpicker" id="imei">
                 <option value="0">ALL IMEI</option>
             </select>
-            <label for="from">From</label>
-            <input id="from" type="date"/>
-            <label for="to">To</label>
-            <input id="to" type="date"/>
-            <input type="button" id="button" value="Filter"/>
+            <label for="from">
+                <input id="from" type="date" class="form-control"/>
+            </label>
+            <label for="to">
+                <input id="to" type="date" class="form-control"/>
+            </label>
+            <input type="button" id="button" value="Filter" class="btn btn-default"/>
         </div>
 
         <canvas id="chart" style="width: 100%;height: 400px;margin-top: 50px"></canvas>
@@ -87,8 +104,10 @@
                     }).done(updateChart);
                 }
 
-                $("#button").click(rest);
+
                 rest();
+
+                $("#button").click(rest);
             });
         </script>
     </body>
