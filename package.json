@@ -35,6 +35,7 @@
     "mysql": "^2.5.5",
     "chart.js": ">=1.0.2",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "sequelize": "^2.0.5",
 <<<<<<< HEAD
     "better-console": "^0.2.4"
@@ -42,6 +43,9 @@
     "node-rest-client": "1.4.4"
 >>>>>>> 6a517ff (node client)
 =======
+=======
+    "sequelize": "^3.2.0",
+>>>>>>> 1a58fa8 (mini correction)
     "better-console": "^0.2.4",
     "node-rest-client": "1.4.4",
     "object-sizeof": "1.0.0"
