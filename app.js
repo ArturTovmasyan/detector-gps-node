@@ -765,6 +765,11 @@ else {
  CREATE TRIGGER AFTER_raw_statistic_INSERT AFTER INSERT
  ON raw_statistic FOR EACH ROW
  BEGIN
+     INSERT INTO statistic (section_part_id, pass_times_sum, pass_count, route_id, statistic_mode_code)
+                    VALUES (NEW.section_part_id, NEW.interval_to_pass, 1, NEW.route_id, NEW.statistic_mode_code)
+        ON DUPLICATE KEY UPDATE
+            pass_times_sum = pass_times_sum + VALUES(pass_times_sum),
+            pass_count = pass_count + 1;
 
  END $$;
  DELIMITER ;
