@@ -11,12 +11,8 @@ var gps     = require('./lib/gps_controller');
 var loader  = require('./lib/data_loader');
 var param   = require('./config/parameters');
 
-var express = require('express');
-var app     = express();
-var server  = require('http').Server(app);
-var io      = require('socket.io')(server);
-
 var viewControl = require('./lib/view_controller');
+var io          = viewControl.get_socket();
 
 
 //=================================================================================================
@@ -66,11 +62,6 @@ if (cluster.isMaster) {
     }
 
     viewControl.express_start(param.express.stop_port);
-
-    io.on('connection', function(){
-        console.log('a user connected');
-    });
-
 
     //Start listen on 8000 port for incoming api requests
     var apiEmitter = api.start(param.api_controller.port);
