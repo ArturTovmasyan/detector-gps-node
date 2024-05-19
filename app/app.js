@@ -4,7 +4,9 @@
 
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
-var logger  = require('./logger');
+var logger  = require('logger');
+var api = require('api_controller');
+
 
 if (cluster.isMaster) {
 
@@ -13,6 +15,16 @@ if (cluster.isMaster) {
     for (var i = 0; i < numCPUs; i++) {
         workers[i] = cluster.fork();
     }
+
+    api.start();
+
+    api.on('bus_load', function() {
+
+        for (var i = 0; i < numCPUs; i++) {
+            workers[i].send();
+        }
+
+    });
 
 
 
@@ -25,19 +37,6 @@ if (cluster.isMaster) {
 
 }
 else {
-
-    var net = require('net');
-
-    var netServer = net.createServer(function (c) {
-
-        c.pipe(process.stdout);
-
-        c.on('data', function(data) {
-
-        });
-    });
-
-    netServer.listen(50000);
 
     process.on('message', function(msg){
         // ...
