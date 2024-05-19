@@ -103,7 +103,7 @@
                     $(".gps-count").text(markersCount);
                 });
 
-            $.getJSON('http://bus-way.loc/app_dev.php/api/skeletons', function (sections) {
+            $.getJSON('http://10.10.0.22/api/skeletons', function (sections) {
                 var points = [];
                 sections.forEach(function(section) {
                     points.push(new google.maps.LatLng(section.point1.latitude, section.point1.longitude));
@@ -121,7 +121,7 @@
                     points = [];
 
 
-                    $.getJSON('http://bus-way.loc/app_dev.php/api/lines/' + section.id + '/section/parts', function (section_parts) {
+                    $.getJSON('http://10.10.0.22/api/lines/' + section.id + '/section/parts', function (section_parts) {
                         section_parts.forEach(function(section_part) {
                             pos = new google.maps.LatLng(section_part.latitude, section_part.longitude);
                             marker = new google.maps.Marker({
