@@ -37,7 +37,7 @@
     "username": "root",
     "password": null,
     "name":     "bus_nodejs",
-    "timeout":  500
+    "timeout":  2000
   },
 
   "loader": {
