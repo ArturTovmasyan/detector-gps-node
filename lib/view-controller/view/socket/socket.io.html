@@ -7,6 +7,7 @@
     <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="/css/html5-reset.css" rel="stylesheet"/>
     <link href="/css/style.css" rel="stylesheet"/>
+    <link href="/css/main.css" rel="stylesheet"/>
 </head>
 <body style="background: url('/images/bgnoise_lg.png') repeat left top;">
     <div id="container" class="menu" style="width: 300px">
@@ -28,6 +29,7 @@
     <script type="text/javascript" src="/socket.io-client/socket.io.js"></script>
     <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="/js/infobox.js"></script>
     <script>
         $(document).ready(function(){
 
@@ -133,6 +135,8 @@
             //Used to paint sections on the map
             $.getJSON('http://10.10.0.22/api/skeletons', function (sections) {
                 var points = [];
+                var infoTemplate = "<div class='sectionInfobox'>__id__</div>";
+
                 sections.forEach(function(section) {
                     points.push(new google.maps.LatLng(section.point1.latitude, section.point1.longitude));
                     points.push(new google.maps.LatLng(section.point2.latitude, section.point2.longitude));
@@ -144,6 +148,25 @@
                         strokeColor: 'red',
                         strokeOpacity: 1.0,
                         strokeWeight: 4
+                    });
+                    var point = {};
+                    point.lat = (section.point1.latitude + section.point2.latitude) / 2;
+                    point.lng = (section.point1.longitude + section.point2.longitude) / 2;
+                    point = new google.maps.LatLng(point.lat,point.lng);
+
+                    var infoboxOptions = {
+                        content: infoTemplate.replace("__id__",section.id),
+                        closeBoxURL: '',
+                        position: point
+                    };
+                    var ib = new InfoBox(infoboxOptions);
+
+                    google.maps.event.addListener(polylines[section.id],'mouseover',function(){
+                        ib.open(map, null);
+                    });
+
+                    google.maps.event.addListener(polylines[section.id],'mouseout',function(){
+                        ib.close();
                     });
 
                     points = [];
