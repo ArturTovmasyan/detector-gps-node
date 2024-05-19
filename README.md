@@ -63,8 +63,10 @@ For Testing The project you have to install Mocha by global
     Then run: mocha
 ```
 
+After project setup need to create config/parameters.js to write machine parameters.
 
-
-
-
-
+For creating tables need to run
+```bashp
+    node app/console.js
+```
+command with necessary parameters.
