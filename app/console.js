@@ -5,6 +5,7 @@
 var tableCommands   = require("../lib/models/Table").commands;
 var syncCommands    = require("../lib/synchronizer").commands;
 var checkerCommands = require("../lib/statistic/checker").commands;
+var routesCommands  = require("../lib/passRoutesCalculator").commands;
 var console         = require('better-console');
 
 var commands = {
@@ -17,6 +18,8 @@ var commands = {
 commands = marge(commands, tableCommands);
 commands = marge(commands, syncCommands);
 commands = marge(commands, checkerCommands);
+commands = marge(commands, routesCommands);
+
 
 if (!process.argv[2] || !commands[process.argv[2]]) {
     showHelp();

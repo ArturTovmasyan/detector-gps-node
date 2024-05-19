@@ -135,14 +135,22 @@ if (cluster.isMaster){
     var forecastingCheckDateTime = null;
 
     setInterval(function(){
-        sync.syncronize();
-
         for(var imei in currentBusPositions){
             busInfo = currentBusPositions[imei];
             var currentDate = new Date();
             if (((currentDate - busInfo.gpsData.timestamp) / 60000) > 10){
                 busInfo.busStatus = 'no_data'
             }
+        }
+    }, 600000);
+
+
+    setInterval(function(){
+        try {
+            sync.syncronize();
+        }
+        catch(e){
+            console.log(e.message);
         }
 
         //Calculate forecasting errors every day after 21:00
@@ -155,7 +163,7 @@ if (cluster.isMaster){
         //Calculate buses passed routes
         rCalc.calculateRoutes();
 
-    }, 600000);
+    }, 3600000);
 
     viewControl.express_start(param.express.stop_port);
 }
