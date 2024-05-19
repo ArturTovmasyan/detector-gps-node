@@ -187,13 +187,12 @@ else {
         console.log(stats);
     });
 
-    var hd = new memwatch.HeapDiff();
-
-    setInterval(function() {
-        var diff = hd.end();
-        hd = new memwatch.HeapDiff();
-        log.log('error', diff.change.details, process.pid);
-    }, 1800000);
+    //var hd = new memwatch.HeapDiff();
+    //setInterval(function() {
+    //    var diff = hd.end();
+    //    hd = new memwatch.HeapDiff();
+    //    log.log('error', diff.change.details, process.pid);
+    //}, 1800000);
 
     loader.setStatisticModeLoadingInterval(3600000);
     var dataListener = solver.start();
