@@ -87,7 +87,7 @@
                             //Collect markers in the bus_section_part_marker object
                             bus_section_part_marker[gpsData.imei] = new google.maps.Marker({
                                 position: pos,
-                                icon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
+                                icon: "http://maps.gstatic.com/mapfiles/ridefinder-images/mm_20_orange.png"
                             });
                         }
 
@@ -95,12 +95,12 @@
                     }
 
 
-                    var busIcon = "http://maps.google.com/mapfiles/kml/paddle/red-blank.png";
+                    var busIcon = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
                     if (msg.busInfo.busStatus == "on_line"){
-                        busIcon = "http://maps.google.com/mapfiles/kml/paddle/grn-blank.png";
+                        busIcon = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
                     }
                     else if (msg.busInfo.busStatus == "no_data"){
-                        busIcon = "http://maps.google.com/mapfiles/kml/paddle/blu-blank.png";
+                        busIcon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
                     }
 
 
