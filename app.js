@@ -10,6 +10,7 @@ var loader1 = require('./lib/data-loader/loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 var sync    = require('./lib/synchronizer');
+var rCalc   = require('./lib/passRoutesCalculator');
 var stat    = require('./lib/statistic');
 var api     = require('./lib/api-controller');
 var statChecker = require('./lib/statistic/checker');
@@ -56,6 +57,7 @@ if (cluster.isMaster){
             if (msg.busInfo){
                 if (!currentBusPositions[msg.busInfo.gpsData.imei] || currentBusPositions[msg.busInfo.gpsData.imei].gpsData.timestamp < msg.busInfo.gpsData.timestamp)
                 {
+                    //This part for saving first data in route for statistic coefficient calculation
                     if (currentBusPositions[msg.busInfo.gpsData.imei] &&
                         currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute &&
                         currentBusPositions[msg.busInfo.gpsData.imei].firstDataInRoute.route_id == msg.busInfo.gpsData.route_id &&
@@ -73,6 +75,7 @@ if (cluster.isMaster){
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
                     consecutiveBuses(msg.busInfo.gpsData.imei, currentBusPositions, busesOrderInRoutes);
 
+                    //Send bus data to nearest stops
                     if (msg.busInfo.statistic) {
                         for (var k in msg.busInfo.statistic.stopTimes) {
                             var sendData = {
@@ -87,6 +90,7 @@ if (cluster.isMaster){
                         }
                     }
 
+                    //Send bus data to corresponding customer
                     var customerData = {
                         imei:        msg.busInfo.gpsData.imei,
                         latitude:    msg.busInfo.gpsData.latitude,
@@ -141,11 +145,15 @@ if (cluster.isMaster){
             }
         }
 
+        //Calculate forecasting errors every day after 21:00
         var d = new Date();
         if (d.getHours() > 21 && (!forecastingCheckDateTime || forecastingCheckDateTime.getDate() != d.getDate())) {
             forecastingCheckDateTime = new Date();
             statChecker.calculateAllForecastingErrors(true);
         }
+
+        //Calculate buses passed routes
+        rCalc.calculateRoutes();
 
     }, 600000);
 
