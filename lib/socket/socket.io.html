@@ -7,9 +7,9 @@
 </head>
 <body>
 
-    <canvas id="map" style="width:100%;height:600px"></canvas>
+    <div id="map" style="width:100%;height:600px"></div>
 
-    <!--<script src="../../node_modules/socket.io-client/socket.io.js"></script>-->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
@@ -25,25 +25,30 @@
             }
             var map = mapInit();
 
-            $(window).resize(function() {
-                google.maps.event.trigger(map, 'resize');
-            });
-            google.maps.event.trigger(map, 'resize');
+            var socket = io();
+            var markers = [];
+            socket
+                .on('connect', function () {
+                    console.log('socket connected...')
+                })
+                .on('disconnect',function(){
+                    console.log('socket disconnected...');
+                })
+                .on('message',function(data){
+                    console.log('message',data);
 
-
-
-
-//            var socket = io('http://localhost:8000');
-//            socket
-//                .on('connect', function () {
-//                    console.log('socket connected...')
-//                })
-//                .on('disconnect',function(){
-//                    console.log('socket disconnected...');
-//                })
-//                .on('message',function(data){
-//                    console.log('message',data);
-//                });
+                    if(markers.indexOf(data.IMEI) === -1) {
+                        var marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000)
+                        });
+                        marker.setMap(map);
+                        markers[data.IMEI] = marker;
+                    }
+                    else {
+                        var marker = markers[data.IMEI];
+                        marker.setPosition(new google.maps.LatLng(data.latitude / 10000000,data.longitude / 10000000));
+                    }
+                });
         });
     </script>
 </body>

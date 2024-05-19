@@ -9,6 +9,12 @@ var api     = require('./lib/api_controller');
 var gps     = require('./lib/gps_controller');
 var loader  = require('./lib/data_loader');
 
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+
+
 
 if (cluster.isMaster) {
 
@@ -23,13 +29,26 @@ if (cluster.isMaster) {
             if (msg.gpsData) {
                 if (!currentBusPositions[msg.gpsData.IMEI] || currentBusPositions[msg.gpsData.IMEI].timestamp < msg.gpsData.data.timestamp) {
                     currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data;
+                    msg.gpsData.data.IMEI = msg.gpsData.IMEI;
 
+                    io.send(msg.gpsData.data);
                     //TODO: need to send by socket to the map currentBusPositions or only msg.gpsData
-		            console.log(currentBusPositions);
+                    console.log(msg.gpsData.data);
                 }
             }
         });
     }
+
+    server.listen(7777);
+
+    app.get('/', function (req, res) {
+        res.sendfile(__dirname + '/lib/socket/socket.io.html');
+    });
+
+    io.on('connection', function(){
+        console.log('a user connected');
+    });
+
 
     //Start listen on 8000 port for incoming api requests
     var apiEmitter = api.start(8000);
