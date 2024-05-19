@@ -38,14 +38,18 @@
                     console.log('message',data);
 
                     if(!markers[data.IMEI]) {
+                        var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
                         var marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000)
+                            position: pos
                         });
                         marker.setMap(map);
+                        map.setCenter(pos);
                         markers[data.IMEI] = marker;
                     }
                     else {
-                        markers[data.IMEI].setPosition(new google.maps.LatLng(data.latitude / 10000000,data.longitude / 10000000));
+                        var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
+                        markers[data.IMEI].setPosition(pos);
+                        map.setCenter(new google.maps.LatLng(pos);
                     }
                 });
         });
