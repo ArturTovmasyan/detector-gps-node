@@ -9,6 +9,8 @@ var api     = require('./lib/api-controller');
 var gps     = require('./lib/gps-controller');
 var loader  = require('./lib/data-loader');
 var param   = require('./config/parameters');
+var solver  = require('./lib/solver');
+
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
@@ -30,7 +32,9 @@ if (cluster.isMaster) {
                     currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data;
                     msg.gpsData.data.IMEI = msg.gpsData.IMEI;
 
-                    io.send(msg.gpsData.data);
+                    var sectionPart = solver.findNearestSectionPart(msg.gpsData.data);
+
+                    io.send({data: msg.gpsData.data, section_part: sectionPart});
                     //TODO: need to send by socket to the map currentBusPositions or only msg.gpsData
                     console.log(msg.gpsData.data);
                 }
