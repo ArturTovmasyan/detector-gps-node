@@ -31,7 +31,12 @@ if (cluster.isMaster) {
                 if (!currentBusPositions[msg.gpsData.imei] || currentBusPositions[msg.gpsData.imei].timestamp < msg.gpsData.timestamp)
                 {
                     currentBusPositions[msg.gpsData.imei] = msg.gpsData;
-                    io.send({data: msg.gpsData, section_part: msg.sectionPart});
+
+                    if (msg.sectionPart) {
+                        solver.findBusRoute(msg.gpsData.imei, msg.sectionPart.section.id);
+                    }
+
+                    io.send({data: msg.gpsData, section_part: msg.sectionPart, routeSectionOrder: solver.routeSectionOrder});
                 }
             }
         });
