@@ -36,6 +36,6 @@
   },
 
   "loader": {
-    "host": "localhost"
+    "host": "http://bus.loc/app_dev.php"
   }
 }
