@@ -3,11 +3,11 @@
     "port": 8000,
     "urls": {
       "/api/load_buses": {
-        "event": "load_buses",
+        "event":  "load_buses",
         "method": "GET"
       },
       "/api/load_routes": {
-        "event": "load_routes",
+        "event":  "load_routes",
         "method": "GET"
       }
     }
@@ -18,32 +18,35 @@
   },
 
   "express": {
-    "stop_port": 7777,
+    "stop_port":     7777,
     "public_vendor": "node_modules",
-    "resources": "lib/view-controller/Resources/"
+    "resources":     "lib/view-controller/Resources/"
   },
 
   "logger": {
-    "dev_path": "logs/",
-    "prod_path": "logs/"
+    "dev_path":   "logs/",
+    "prod_path":  "logs/"
   },
 
   "database": {
-    "host": "127.0.0.1",
+    "host":     "127.0.0.1",
     "username": "root",
     "password": null,
-    "name": "bus_nodejs"
+    "name":     "bus_nodejs"
   },
 
   "loader": {
-    "host": "http://bus.loc/app_dev.php",
-    "vector_parts_ready_event": "vector_parts_ready_event",
-    "lines_ready_event": "lines_ready_event"
+    "host":                      "http://10.10.0.22",
+    "lines_ready_event":         "lines_ready_event",
+    "section_parts_ready_event": "section_parts_ready_event",
+    "sections_ready_event":      "sections_ready_event"
+
+
   },
 
   "solver": {
-    "distance_coef": 109718.06,
-    "start_latitude": 40.171613,
+    "distance_coef":   109718.06,
+    "start_latitude":  40.171613,
     "start_longitude": 44.538151
   }
 }
