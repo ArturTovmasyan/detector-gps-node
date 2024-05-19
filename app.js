@@ -10,6 +10,7 @@ var gps     = require('./lib/gps-controller');
 var loader  = require('./lib/data-loader/loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
+var sync    = require('./lib/synchronizer');
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
@@ -38,6 +39,7 @@ if (cluster.isMaster) {
     }
 
     setInterval(function(){
+        sync.syncronize();
         for(var imei in currentBusPositions){
             busInfo = currentBusPositions[imei];
             var currentDate = new Date();
@@ -45,7 +47,7 @@ if (cluster.isMaster) {
                 busInfo.busStatus = 'no_data'
             }
         }
-    }, 600000);
+    }, 1000);
 
     viewControl.express_start(param.express.stop_port);
 
