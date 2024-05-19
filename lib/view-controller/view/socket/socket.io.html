@@ -45,7 +45,6 @@
             var markers = [];
             var markersCount = 0;
 
-
             //For polylines
             var polylines = {};
 
@@ -65,6 +64,7 @@
                     }
 
                     console.log('message',data);
+                    console.log('section_part',section_part);
 
                     if(!markers[data.IMEI]) {
                         var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
