@@ -14,7 +14,7 @@ var stat    = require('./lib/statistic');
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
-
+var kioskSocket = require('./lib/kiosk-socket').socketIo;
 
 /*********************************************************************************************
  currentBusPositions: structure
@@ -54,6 +54,10 @@ if (cluster.isMaster){
                 {
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
                     consecutiveBuses(msg.busInfo.gpsData.imei, currentBusPositions, busesOrderInRoutes);
+
+                    for(var k in msg.busInfo.statistic.stopTimes) {
+                        kioskSocket.to('' + k).emit(msg.busInfo);
+                    }
 
                     io.send({busInfo: msg.busInfo});
                 }
