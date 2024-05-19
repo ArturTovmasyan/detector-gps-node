@@ -37,7 +37,7 @@
                 .on('message',function(data){
                     console.log('message',data);
 
-                    if(markers.indexOf(data.IMEI) === -1) {
+                    if(!markers[data.IMEI]) {
                         var marker = new google.maps.Marker({
                             position: new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000)
                         });
