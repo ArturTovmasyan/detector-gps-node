@@ -29,7 +29,7 @@
   "database": {
     "host": "127.0.0.1",
     "username": "root",
-    "password": "gpstest1324",
+    "password": null,
     "name": "bus_nodejs"
   }
 }
