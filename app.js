@@ -101,7 +101,7 @@ if (cluster.isMaster){
                         imei:         msg.busInfo.gpsData.imei,
                         latitude:     msg.busInfo.gpsData.latitude,
                         longitude:    msg.busInfo.gpsData.longitude,
-                        angle:        msg.busInfo.gpsData.angle,
+                        angle:        msg.busInfo.angle ? msg.busInfo.angle : msg.busInfo.gpsData.angle,
                         speed:        msg.busInfo.gpsData.speed,
                         route_id:     msg.busInfo.gpsData.route_id,
                         lineNumber:   msg.busInfo.lineNumber,
