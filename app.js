@@ -67,6 +67,7 @@ if (cluster.isMaster){
         });
     }
 
+    sync.syncronize();
     setInterval(function(){
         sync.syncronize();
         for(var imei in currentBusPositions){
