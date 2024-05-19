@@ -23,9 +23,8 @@ if (cluster.isMaster) {
             if (msg.gpsData) {
                 if (!currentBusPositions[msg.gpsData.IMEI] || currentBusPositions[msg.gpsData.IMEI].timestamp < msg.gpsData.data.timestamp) {
                     currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data
+		    console.log(currentBusPositions);
                 }
-
-                console.log(currentBusPositions);
             }
         });
     }
