@@ -5,8 +5,7 @@
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var log     = require('./lib/logger');
-var api     = require('./lib/api-controller');
-var loader  = require('./lib/data-loader/loader');
+var loader  = require('./lib/data-loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 var sync    = require('./lib/synchronizer');
@@ -35,6 +34,16 @@ var io          = viewControl.get_socket();
  ***********************************************************************************************/
 
 if (cluster.isMaster){
+
+
+    var t = sync.syncronize();
+
+    console.log(t);
+    t.on('changes', function() {
+        console.error('there are changes');
+    });
+
+
 
     var kioskSocket = require('./lib/kiosk-socket').socketIo;
     var workers = [];
@@ -75,8 +84,17 @@ if (cluster.isMaster){
         });
     }
 
+    var syncListener = sync.syncronize();
+
+    syncListener.on('changes', function() {
+        for(var k in workers){
+            workers[k].send('reload');
+        }
+    });
+
     setInterval(function(){
         sync.syncronize();
+
         for(var imei in currentBusPositions){
             busInfo = currentBusPositions[imei];
             var currentDate = new Date();
@@ -87,50 +105,25 @@ if (cluster.isMaster){
     }, 600000);
 
     viewControl.express_start(param.express.stop_port);
-
-    //Start listen on 8000 port for incoming api requests
-    var apiEmitter = api.start(param.api_controller.port);
-
-    //listen for incoming commands
-    apiEmitter.on('load_buses', function() {
-        workers.forEach(function(worker) {
-            worker.send({load_buses: true});
-        })
-    });
-    apiEmitter.on('load_routes', function() {
-        workers.forEach(function(worker) {
-            worker.send({load_routes: true});
-        })
-    });
 }
 else {
-
-    //Load data to start a work
-    var buses = loader.getBusesSync();
-    var routes = loader.getRoutesSync();
-
-    //check data from parent and do corresponding actions
-    process.on('message', function (msg) {
-        if (msg.load_buses) {
-            loader.getBuses(function (err, data) {
-                buses = data;
-                console.log('_____buses_loaded_____ process id:' + process.pid);
-            });
-        }
-        if (msg.load_routes) {
-            loader.getRoutes(function (err, data) {
-                routes = data;
-                console.log('_____routes_loaded_____ process id:' + process.pid);
-            });
-        }
-    });
 
     var dataListener = solver.start();
 
     dataListener.on('data', function(busInfo) {
         process.send({busInfo: busInfo});
     });
+
+    process.on('message', function(msg) {
+       if (msg == 'reload'){
+           loader.reLoad();
+       }
+    });
 }
+
+
+
+
 
 
 /*************************************************************************
