@@ -158,7 +158,7 @@ if (cluster.isMaster){
         var d = new Date();
 
         log.log('error', 'Hour timeout. Hour is: ' + d.getHours() +
-                            ' forecasting check Date: ' + forecastingCheckDateTime.getDate() +
+                            ' forecasting check Date: ' + (forecastingCheckDateTime ? forecastingCheckDateTime.getDate() : 'null') +
                             ' current date: ' + d.getDate());
 
         if (d.getHours() >= 21 && (!forecastingCheckDateTime || forecastingCheckDateTime.getDate() != d.getDate())) {
