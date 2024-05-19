@@ -59,9 +59,10 @@
 
                 function updateChart(data){
                     console.log(data);
+                    data = JSON.parse(data);
                     var ctx = document.getElementById("chart").getContext("2d");
                     Chart.defaults.global.scaleLineColor = "rgba(0,0,0,.2)";
-                    
+
                     if(!chart){
                         var d = setChartData(data);
                         chart = new Chart(ctx).Bar(d, {
