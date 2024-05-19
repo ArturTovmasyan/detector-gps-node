@@ -58,6 +58,7 @@ if (cluster.isMaster){
                     if (msg.busInfo.statistic) {
                         for (var k in msg.busInfo.statistic.stopTimes) {
                             kioskSocket.to('' + k).send(msg.busInfo);
+                            console.log(msg.busInfo.statistic);
                         }
                     }
 
