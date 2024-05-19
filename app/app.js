@@ -4,8 +4,10 @@
 
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
-var logger  = require('logger');
-var api = require('api_controller');
+var logger  = require('./lib/logger');
+var api     = require('./lib/api_controller');
+var gps     = require('./lib/gps_controller');
+var loader  = require('./lib/data_loader');
 
 
 if (cluster.isMaster) {
@@ -16,33 +18,44 @@ if (cluster.isMaster) {
         workers[i] = cluster.fork();
     }
 
-    api.start();
+    //Start listen on 8000 port for incoming api requests
+    var apiEmitter = api.start(8000);
 
-    api.on('bus_load', function() {
-
-        for (var i = 0; i < numCPUs; i++) {
-            workers[i].send();
-        }
-
+    //listen for incoming commands
+    apiEmitter.on('load_buses', function() {
+        workers.forEach(function(worker) {
+            worker.send('load_buses');
+        })
     });
-
-
-
-    //Listen on worker messages
-    workers[i].on('message', function(msg) {
-        // ...
+    apiEmitter.on('load_routes', function() {
+        workers.forEach(function(worker) {
+            worker.send('load_routes');
+        })
     });
-
-    // workers[i].send({...});
-
 }
 else {
 
-    process.on('message', function(msg){
-        // ...
+    //Load data to start a work
+    var buses = loader.getBusesSync();
+    var routes = loader.getRoutesSync();
+
+    //check data from parent and do corresponding actions
+    process.on('message', function (msg) {
+        if (msg == 'load_buses') {
+            loader.getBuses(function (err, data) {
+                buses = data;
+                console.log('_____buses_loaded_____ process id:' + process.pid);
+            });
+        }
+        if (msg == 'load_routes') {
+            loader.getRoutes(function (err, data) {
+                routes = data;
+                console.log('_____routes_loaded_____ process id:' + process.pid);
+            });
+        }
     });
 
-    // process.send({...});
-
+    //start listen for incoming requests from gps devices
+    gps.start(50000);
 }
 

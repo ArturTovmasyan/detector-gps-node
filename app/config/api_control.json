@@ -1,6 +1,10 @@
 {
-  "/api/get": {
-    "event": "hello",
+  "/api/load_buses": {
+    "event": "load_buses",
+    "method": "GET"
+  },
+  "/api/load_routes": {
+    "event": "load_routes",
     "method": "GET"
   }
 }

@@ -17,7 +17,9 @@ var event = new ee;
  */
 function start(port_number, host, err) {
     server = createServer(err);
-    listen(port_number, host, server, err)
+    listen(port_number, host, server, err);
+
+    return event;
 }
 /**
  *
@@ -39,7 +41,7 @@ function checker(request_stream, err) {
     var method = request_stream.method;
     var obj = null;
 
-    if(config.indexOf(url) !== -1){
+    if(config[url]){
         obj = config[url];
 
         if(!obj.event){
