@@ -121,16 +121,16 @@
                     points = [];
 
 
-                    $.getJSON('http://10.10.0.22/api/lines/' + section.id + '/section/parts', function (section_parts) {
-                        section_parts.forEach(function(section_part) {
-                            pos = new google.maps.LatLng(section_part.latitude, section_part.longitude);
-                            marker = new google.maps.Marker({
-                                position: pos,
-                                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                            });
-                            marker.setMap(map);
-                        });
-                    });
+//                    $.getJSON('http://10.10.0.22/api/lines/' + section.id + '/section/parts', function (section_parts) {
+//                        section_parts.forEach(function(section_part) {
+//                            pos = new google.maps.LatLng(section_part.latitude, section_part.longitude);
+//                            marker = new google.maps.Marker({
+//                                position: pos,
+//                                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+//                            });
+//                            marker.setMap(map);
+//                        });
+//                    });
                 });
             });
 
@@ -140,7 +140,8 @@
             var pos = new google.maps.LatLng(40.171613, 44.538151);
             var marker = new google.maps.Marker({
                 position: pos,
-                title:"Station"
+                title:"Station",
+                icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
             });
             marker.setMap(map);
         });
