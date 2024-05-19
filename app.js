@@ -184,6 +184,7 @@ else {
 
     var memwatch = require('memwatch');
     memwatch.on('leak', function(stats) {
+        log.log('error', stats);
         console.log(stats);
     });
 
