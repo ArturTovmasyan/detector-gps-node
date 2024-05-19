@@ -7,7 +7,7 @@ var numCPUs = require('os').cpus().length;
 var log     = require('./lib/logger');
 var api     = require('./lib/api-controller');
 var gps     = require('./lib/gps-controller');
-var loader  = require('./lib/data-loader');
+var loader  = require('./lib/data-loader/loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 
@@ -98,14 +98,14 @@ else {
 /*
 
  SELECT i1.section_part_id as fromSectionPart, (SELECT i2.section_part_id
- FROM bus_nodejs.gps_info as i2
+ FROM bus_nodejs.gps_data as i2
  WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as toSectionPart,
  i1.route_id,
  (SELECT i2.timestamp
- FROM bus_nodejs.gps_info as i2
+ FROM bus_nodejs.gps_data as i2
  WHERE i1.imei = i2.imei AND i2.timestamp > i1.timestamp AND i1.route_id = i2.route_id ORDER BY i2.timestamp ASC LIMIT 1) as timestamp
 
- FROM bus_nodejs.gps_info as i1
+ FROM bus_nodejs.gps_data as i1
  WHERE i1.route_id IS NOT NULL
 
 
@@ -208,14 +208,14 @@ else {
 
                                     (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id
 
-                             FROM bus_nodejs.gps_info as i1
+                             FROM bus_nodejs.gps_data as i1
 
-                             JOIN bus_nodejs.gps_info as i2
+                             JOIN bus_nodejs.gps_data as i2
                              ON  i1.imei = i2.imei
                              AND i2.timestamp > i1.timestamp
                              AND i1.route_id = i2.route_id
                              AND NOT EXISTS (SELECT *
-                                             FROM bus_nodejs.gps_info as i3
+                                             FROM bus_nodejs.gps_data as i3
                                              WHERE i1.imei = i3.imei
                                              AND i1.route_id = i3.route_id
                                              AND i3.timestamp > i1.timestamp
@@ -362,15 +362,15 @@ else {
 
        (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id as routeId
 
-       FROM bus_nodejs.gps_info as i1
+       FROM bus_nodejs.gps_data as i1
 
 
-       JOIN bus_nodejs.gps_info as i2
+       JOIN bus_nodejs.gps_data as i2
        ON  i1.imei = i2.imei
        AND i2.timestamp > i1.timestamp
        AND i1.route_id = i2.route_id
        AND NOT EXISTS (SELECT *
-       FROM bus_nodejs.gps_info as i3
+       FROM bus_nodejs.gps_data as i3
        WHERE i1.imei = i3.imei
        AND i1.route_id = i3.route_id
        AND i3.timestamp > i1.timestamp
@@ -486,15 +486,15 @@ else {
 
                          (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id as routeId
 
-                         FROM bus_nodejs.gps_info as i1
+                         FROM bus_nodejs.gps_data as i1
 
 
-                         JOIN bus_nodejs.gps_info as i2
+                         JOIN bus_nodejs.gps_data as i2
                          ON  i1.imei = i2.imei
                          AND i2.timestamp > i1.timestamp
                          AND i1.route_id = i2.route_id
                          AND NOT EXISTS (SELECT *
-                         FROM bus_nodejs.gps_info as i3
+                         FROM bus_nodejs.gps_data as i3
                          WHERE i1.imei = i3.imei
                          AND i1.route_id = i3.route_id
                          AND i3.timestamp > i1.timestamp
@@ -555,10 +555,10 @@ else {
 
 ***********************************************************************************************************************
 
- DROP TRIGGER IF EXISTS `AFTER_gps_info_statistic_INSERT`
+ DROP TRIGGER IF EXISTS `AFTER_gps_data_INSERT`
  DELIMITER $$;
- CREATE TRIGGER AFTER_gps_info_statistic_INSERT AFTER INSERT
- ON gps_info FOR EACH ROW
+ CREATE TRIGGER AFTER_gps_data_statistic_INSERT AFTER INSERT
+ ON gps_data FOR EACH ROW
  BEGIN
 
      DECLARE fromSectionPart INT;
@@ -582,13 +582,13 @@ else {
 
      SET lastInfoId = (SELECT b.last_record_id
                        FROM bus_last_info_id as b
-                       JOIN gps_info as i ON i.id = b.last_record_id AND i.route_id = routeId
+                       JOIN gps_data as i ON i.id = b.last_record_id AND i.route_id = routeId
                        WHERE b.imei = NEW.imei);
 
      IF (lastInfoId IS NOT NULL) THEN
 
          SET fromSectionPart = (SELECT i.section_part_id
-                                FROM gps_info as i
+                                FROM gps_data as i
                                 WHERE i.id = lastInfoId);
 
          SET fromSectionOrder = (SELECT rs.section_order
@@ -618,7 +618,7 @@ else {
 
 
          SET timeToPass = (SELECT abs(NEW.timestamp - i.timestamp)
-                           FROM gps_info as i
+                           FROM gps_data as i
                            WHERE i.id = lastInfoId);
 
          INSERT statistic (section_part_id, interval_to_pass, timestamp)
@@ -633,7 +633,7 @@ else {
 
 
 
-         INSERT statistic (section_part_id, interval_to_pass)
+         INSERT raw_statistic (section_part_id, interval_to_pass)
                  SELECT sp.id, (timeToPass / data.cnt)
                  FROM `bus-way`.section_part as sp
                  JOIN `bus-way`.section as s ON s.id = sp.section_id
@@ -683,7 +683,7 @@ else {
 ************************************************************************************************************************
 
 
- INSERT INTO  `bus_nodejs`.`gps_info` (
+ INSERT INTO  `bus_nodejs`.`gps_data` (
 
  `id` ,
  `imei` ,
@@ -704,7 +704,7 @@ else {
 
 
 
- INSERT INTO  `bus_nodejs`.`gps_info` (
+ INSERT INTO  `bus_nodejs`.`gps_data` (
 
  `id` ,
  `imei` ,
@@ -733,7 +733,7 @@ else {
 
     INSERT `bus-way`.statistic (statistic_mode_id, route_id, section_part_id, algorithm, times_sum, times_count)
 
-         SELECT modeId,
+         SELECT modeId, s.route_id
          FROM statistic as s
 
 
@@ -751,12 +751,22 @@ else {
          AND   ((hi.time_from <= hi.time_to AND hi.time_from <= TIME(i1.timestamp) AND hi.time_to >= TIME(i1.timestamp))
          OR (hi.time_from > hi.time_to AND (hi.time_from <= TIME(i1.timestamp) OR hi.time_to >= TIME(i1.timestamp))))
 
-
-         GROUP BY s.section_part_id
+         GROUP BY s.section_part_id, s.route_id
 
 
  END $$;
  DELIMITER ;
 
+****************************************************************************************************
+
+
+ DROP TRIGGER IF EXISTS AFTER_raw_statistic_INSERT
+ DELIMITER $$;
+ CREATE TRIGGER AFTER_raw_statistic_INSERT AFTER INSERT
+ ON raw_statistic FOR EACH ROW
+ BEGIN
+
+ END $$;
+ DELIMITER ;
 
  */
