@@ -11,9 +11,6 @@ var loader  = require('./lib/data-loader');
 var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 
-
-var routeSectionOrder = require('./lib/solver/routeDeterminator').routeSectionOrder;
-
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
 
@@ -41,13 +38,14 @@ if (cluster.isMaster) {
     }
 
     setInterval(function(){
-        currentBusPositions.forEach(function(busInfo) {
+        for(var imei in currentBusPositions){
+            busInfo = currentBusPositions[imei];
             var currentDate = new Date();
             if (((currentDate - busInfo.gpsData.timestamp()) / 60000) > 10){
                 busInfo.busStatus = 'no_data'
             }
-        })
-    }, 600000);
+        }
+    }, 60000);
 
     viewControl.express_start(param.express.stop_port);
 
