@@ -19,7 +19,8 @@
 
   "express": {
     "stop_port": 7777,
-    "public_vendor": "node_modules"
+    "public_vendor": "node_modules",
+    "resources": "lib/view_controller/Resources/"
   },
 
   "logger": {
