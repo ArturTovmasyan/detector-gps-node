@@ -84,19 +84,22 @@
 
                 function updateChart(data){
                     console.log(data);
+                    if(!data || !data.length){
+                        return;
+                    }
                     data = JSON.parse(data);
                     var ctx = document.getElementById("chart").getContext("2d");
                     Chart.defaults.global.scaleLineColor = "rgba(0,0,0,.2)";
 
                     if(!chart){
-                        var d = setChartData(data,data[0].imei ? true:false);
+                        var d = setChartData(data,(data && data[0].imei) ? true:false);
                         chart = new Chart(ctx).Bar(d, {
                             barShowStroke: false
                         });
                     }
                     else {
                         chart.destroy();
-                        var d = setChartData(data,data[0].imei ? true:false);
+                        var d = setChartData(data,(data && data[0].imei) ? true:false);
                         chart = new Chart(ctx).Bar(d, {
                             barShowStroke: false
                         });
