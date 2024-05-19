@@ -44,7 +44,7 @@ if (cluster.isMaster) {
         currentBusPositions.forEach(function(busInfo) {
             var currentDate = new Date();
             if (((currentDate - busInfo.gpsData.timestamp()) / 60000) > 10){
-                busInfo.status = 'no_data'
+                busInfo.busStatus = 'no_data'
             }
         })
     }, 600000);
