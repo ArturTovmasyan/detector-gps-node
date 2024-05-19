@@ -41,7 +41,7 @@ if (cluster.isMaster) {
         for(var imei in currentBusPositions){
             busInfo = currentBusPositions[imei];
             var currentDate = new Date();
-            if (((currentDate - busInfo.gpsData.timestamp()) / 60000) > 10){
+            if (((currentDate - busInfo.gpsData.timestamp) / 60000) > 10){
                 busInfo.busStatus = 'no_data'
             }
         }
