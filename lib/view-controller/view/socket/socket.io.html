@@ -119,8 +119,22 @@
                     });
 
                     points = [];
+
+
+                    $.getJSON('http://10.10.0.22/api/lines/' + section.id + '/section/parts', function (section_parts) {
+                        section_parts.forEach(function(section_part) {
+                            pos = new google.maps.LatLng(section_part.latitude, section_part.longitude);
+                            bus_section_part_marker[data.IMEI] = new google.maps.Marker({
+                                position: pos,
+                                title:"Station",
+                                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                            });
+                            bus_section_part_marker[data.IMEI].setMap(map);
+                        });
+                    });
                 });
             });
+
 
 
             //Station map
