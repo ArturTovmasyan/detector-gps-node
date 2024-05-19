@@ -46,8 +46,9 @@
             var markersCount = 0;
 
             //For polylines
-            var polylines = {};
-            var bus_polylines = {};
+            var polylines               = {};
+            var bus_polylines           = {};
+            var bus_section_part_marker = {};
 
 
             socket
@@ -70,6 +71,19 @@
                         polylines[section_part.section.id].setOptions({strokeColor: 'blue'});
                         console.log('imei ', data.IMEI, ' section_id ', section_part.section.id);
                         bus_polylines[data.IMEI] = polylines[section_part.section.id];
+
+                        pos = new google.maps.LatLng(section_part.latitude, section_part.longitude);
+                        if (bus_section_part_marker[data.IMEI]){
+                            bus_section_part_marker[data.IMEI].setPosition(pos)
+                        }
+                        else {
+                            marker = new google.maps.Marker({
+                                position: pos,
+                                title:"Station",
+                                icon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
+                            });
+                            marker.setMap(map);
+                        }
                     }
 
                     if(!markers[data.IMEI]) {
@@ -109,6 +123,7 @@
             });
 
 
+            //Station map
             var pos = new google.maps.LatLng(40.171613, 44.538151);
             var marker = new google.maps.Marker({
                 position: pos,
