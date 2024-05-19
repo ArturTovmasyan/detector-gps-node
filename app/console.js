@@ -2,9 +2,10 @@
  * Created by andranik on 3/24/15.
  */
 
-var tableCommands  = require("../lib/models/Table").commands;
-var syncCommands   = require("../lib/synchronizer").commands;
-var console        = require('better-console');
+var tableCommands   = require("../lib/models/Table").commands;
+var syncCommands    = require("../lib/synchronizer").commands;
+var checkerCommands = require("../lib/statistic/checker").commands;
+var console         = require('better-console');
 
 var commands = {
     'help': {
@@ -15,6 +16,7 @@ var commands = {
 
 commands = marge(commands, tableCommands);
 commands = marge(commands, syncCommands);
+commands = marge(commands, checkerCommands);
 
 if (!process.argv[2] || !commands[process.argv[2]]) {
     showHelp();
