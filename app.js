@@ -270,32 +270,33 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
         if (currentBusPositions[frontImei] && newBasInfo.gpsData.section_part_id && currentBusPositions[frontImei].gpsData.section_part_id) {
             newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id, newBasInfo.lastCoeff, false);
 
-            if (newBasInfo.statistic.passTime && newBasInfo.statistic.passTime > 0) {
-                var date = new Date(newBasInfo.gpsData.timestamp);
-                var hour = date.getHours();
-                date = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-
-                BusMeanInterval.update(
-                    {
-                        line_number: newBasInfo.lineNumber,
-                        date: date,
-                        hour: hour,
-                        interval_sum: sequelize.literal('interval_sum + ' + newBasInfo.statistic.passTime),
-                        data_count: sequelize.literal('data_count + 1')
-                    },
-                    {where: {line_number: newBasInfo.lineNumber, date: date, hour: hour}}
-                ).then(function (affectedRows) {
-                    if (affectedRows == 0) {
-                        BusMeanInterval.create({
-                            line_number: newBasInfo.lineNumber,
-                            date: date,
-                            hour: hour,
-                            interval_sum: newBasInfo.statistic.passTime,
-                            data_count: 1
-                        });
-                    }
-                });
-            }
+            //TODO: may be used in future
+            //if (newBasInfo.statistic.passTime && newBasInfo.statistic.passTime > 0) {
+            //    var date = new Date(newBasInfo.gpsData.timestamp);
+            //    var hour = date.getHours();
+            //    date = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+            //
+            //    BusMeanInterval.update(
+            //        {
+            //            line_number: newBasInfo.lineNumber,
+            //            date: date,
+            //            hour: hour,
+            //            interval_sum: sequelize.literal('interval_sum + ' + newBasInfo.statistic.passTime),
+            //            data_count: sequelize.literal('data_count + 1')
+            //        },
+            //        {where: {line_number: newBasInfo.lineNumber, date: date, hour: hour}}
+            //    ).then(function (affectedRows) {
+            //        if (affectedRows == 0) {
+            //            BusMeanInterval.create({
+            //                line_number: newBasInfo.lineNumber,
+            //                date: date,
+            //                hour: hour,
+            //                interval_sum: newBasInfo.statistic.passTime,
+            //                data_count: 1
+            //            });
+            //        }
+            //    });
+            //}
         }
     }
     catch (e) {
