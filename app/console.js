@@ -4,7 +4,6 @@
 
 var tableCommands  = require("../lib/models/Table").commands;
 var syncCommands   = require("../lib/synchronizer").commands;
-var loaderCommands = require("../lib/data-loader").commands;
 var console        = require('better-console');
 
 var commands = {
@@ -16,7 +15,6 @@ var commands = {
 
 commands = marge(commands, tableCommands);
 commands = marge(commands, syncCommands);
-commands = marge(commands, loaderCommands);
 
 if (!process.argv[2] || !commands[process.argv[2]]) {
     showHelp();
