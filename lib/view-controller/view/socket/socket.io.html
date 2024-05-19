@@ -47,6 +47,8 @@
 
             //For polylines
             var polylines = {};
+            var bus_polylines = {};
+
 
             socket
                 .on('connect', function () {
@@ -62,9 +64,13 @@
                     if (section_part && polylines[section_part.section.id]) {
                         polylines[section_part.section.id].setOptions({strokeColor: 'blue'});
                         console.log('imei ', data.IMEI, ' section_id ', section_part.section.id);
-                    }
 
-//                    console.log('message',data);
+                        if (bus_polylines[data.IMEI]) {
+                            bus_polylines[data.IMEI].setOptions({strokeColor: '#FF0000'});
+                        }
+
+                        bus_polylines[data.IMEI] = polylines[section_part.section.id];
+                    }
 
                     if(!markers[data.IMEI]) {
                         var pos = new google.maps.LatLng(data.latitude / 10000000, data.longitude / 10000000);
