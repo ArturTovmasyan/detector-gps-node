@@ -102,11 +102,9 @@
                         url: "/api/charts_data",
                         data: {from: $("#from").val(), to: $("#to").val(), imei: $("#imei").val()}
                     }).done(updateChart);
-                }
-
+                };
 
                 rest();
-
                 $("#button").click(rest);
             });
         </script>
