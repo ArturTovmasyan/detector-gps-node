@@ -19,8 +19,8 @@ var io          = viewControl.get_socket();
  currentBusPositions: structure
 
  {
-     256632985632154: {busInfo described in lib/solver/index.js},
-     172554113625478: {busInfo described in lib/solver/index.js},
+     256632985632154: {busInfo described in lib/solver/index.js && frontImei: 256354562148765, backImei: 256357845862545},
+     172554113625478: {busInfo described in lib/solver/index.js && frontImei: 115225482526947, backImei: 256357845785145},
      ...
  }
 
@@ -35,23 +35,87 @@ var io          = viewControl.get_socket();
  ***********************************************************************************************/
 
 
+function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
 
-if (cluster.isMaster) {
+    var newBasInfo   = currentBusPositions[imei];
+    var lineNumber   = newBasInfo.lineNumber;
+    var sectionOrder = newBasInfo.section_order;
+    var routeId      = newBasInfo.gpsData.route_id;
+
+    if (!lineNumber || !sectionOrder || !routeId){
+        return null;
+    }
+
+    if (!busesOrderInRoutes[lineNumber]){
+        busesOrderInRoutes[lineNumber] = {};
+    }
+
+    if (!busesOrderInRoutes[lineNumber][routeId]){
+        busesOrderInRoutes[lineNumber][routeId] = {};
+    }
+
+
+    //If there aren't data with such imei remove data with such imei from other routes
+    if (!busesOrderInRoutes[lineNumber][routeId][imei]){
+        busesOrderInRoutes[lineNumber].forEach(function(busesOrderInRoute) {
+            if (busesOrderInRoute[imei]){
+                currentBusPositions[newBasInfo.frontImei].backImei = null;
+                currentBusPositions[newBasInfo.backImei].frontImei = null;
+
+                delete busesOrderInRoute[imei];
+            }
+        });
+    }
+
+    busesOrderInRoutes[lineNumber][routeId][imei] = sectionOrder;
+
+    var frontImei = null;
+    var backImei  = null;
+
+    //Determine front and back buses
+    var busOrdersInRoute =  busesOrderInRoutes[lineNumber][routeId];
+    for (var tempImei in busOrdersInRoute){
+        if (tempImei != imei){
+            if (busOrdersInRoute[tempImei] > busOrdersInRoute[imei] && (frontImei == null || busOrdersInRoute[tempImei] < busOrdersInRoute[frontImei])){
+                frontImei = tempImei;
+            }
+
+            if (busOrdersInRoute[tempImei] < busOrdersInRoute[imei] && (backImei == null || busOrdersInRoute[tempImei] > busOrdersInRoute[backImei])){
+                backImei = tempImei;
+            }
+        }
+    }
+
+
+    newBasInfo.frontImei = frontImei;
+    newBasInfo.backImei  = backImei;
+
+    currentBusPositions[frontImei].backImei = imei;
+    currentBusPositions[backImei].frontImei = imei;
+}
+
+
+if (cluster.isMaster){
 
     var workers = [];
+
     //Object to collect all fresh data from gps
     var currentBusPositions = {};
-    for (var i = 0; i < numCPUs; i++) {
+
+    //Object to collect buses order in routes
+    var busesOrderInRoutes  = {};
+
+    for (var i = 0; i < numCPUs; i++){
         workers[i] = cluster.fork();
 
         workers[i].on('message', function(msg) {
-            if (msg.busInfo) {
+            if (msg.busInfo){
                 if (!currentBusPositions[msg.busInfo.gpsData.imei] || currentBusPositions[msg.busInfo.gpsData.imei].gpsData.timestamp < msg.busInfo.gpsData.timestamp)
                 {
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
+                    consecutiveBuses(msg.busInfo.gpsData.imei, currentBusPositions, busesOrderInRoutes);
+
                     io.send({busInfo: msg.busInfo});
-
-
                 }
             }
         });
