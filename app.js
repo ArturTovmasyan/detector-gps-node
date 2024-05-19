@@ -22,7 +22,7 @@ if (cluster.isMaster) {
     var workers = [];
     //Object to collect all fresh data from gps
     var currentBusPositions = {};
-
+    numCPUs = 1;
     for (var i = 0; i < numCPUs; i++) {
         workers[i] = cluster.fork();
 
