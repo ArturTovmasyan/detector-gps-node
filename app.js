@@ -85,6 +85,8 @@ else {
     dataListener.on('data', function(busInfo) {
         process.send({busInfo: busInfo});
         console.log("worker*/************************");
+        console.log("routeId: " + busInfo.routeId);
+        console.log("sectionPart: " + busInfo.sectionPart);
     });
 }
 
