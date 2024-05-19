@@ -32,6 +32,7 @@ if (cluster.isMaster) {
                     currentBusPositions[msg.gpsData.IMEI] = msg.gpsData.data;
                     msg.gpsData.data.IMEI = msg.gpsData.IMEI;
 
+                    //Determine which section part is nearest to the bus
                     var sectionPart = null;
                     try {
                         sectionPart = solver.findNearestSectionPart({imei: msg.gpsData.data.imei,
@@ -43,7 +44,6 @@ if (cluster.isMaster) {
                     }
 
                     io.send({data: msg.gpsData.data, section_part: sectionPart});
-                    //TODO: need to send by socket to the map currentBusPositions or only msg.gpsData
                     console.log(msg.gpsData.data);
                 }
             }
