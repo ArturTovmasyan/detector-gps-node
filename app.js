@@ -74,6 +74,10 @@ if (cluster.isMaster){
         });
     }
 
+    io.on('connection', function() {
+        io.send(currentBusPositions);
+    });
+
     var syncListener = sync.syncronize();
 
     syncListener.on('changes', function() {
