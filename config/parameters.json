@@ -46,7 +46,8 @@
     "buses_ready_event":              "buses_ready_event",
     "line_section_parts_ready_event": "section_parts_ready_event",
     "line_sections_ready_event":      "sections_ready_event",
-    "statistic_mode_ready_event":     "statistic_mode_ready_event"
+    "statistic_mode_ready_event":     "statistic_mode_ready_event",
+    "line_buses_ready_event":         "line_buses_ready_event"
   },
 
   "solver": {
