@@ -62,13 +62,13 @@
                     var section_part = msg.section_part;
 
                     if (section_part && polylines[section_part.section.id]) {
-                        polylines[section_part.section.id].setOptions({strokeColor: 'blue'});
-                        console.log('imei ', data.IMEI, ' section_id ', section_part.section.id);
 
                         if (bus_polylines[data.IMEI]) {
                             bus_polylines[data.IMEI].setOptions({strokeColor: '#FF0000'});
                         }
 
+                        polylines[section_part.section.id].setOptions({strokeColor: 'blue'});
+                        console.log('imei ', data.IMEI, ' section_id ', section_part.section.id);
                         bus_polylines[data.IMEI] = polylines[section_part.section.id];
                     }
 
