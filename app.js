@@ -306,4 +306,109 @@ else {
 
 
 
+
+************************************************************************************************************************
+
+
+
+
+
+ SELECT sp.id, (pairs.timeToPass / 10)
+ FROM `bus-way`.section_part as sp
+ JOIN `bus-way`.section as s ON s.id = sp.section_id
+ JOIN `bus-way`.route_section as rs ON rs.section_id = s.id
+
+
+ JOIN (SELECT
+
+       CASE
+       WHEN (rs1.section_order < rs2.section_order)
+       THEN i1.section_part_id
+       ELSE i2.section_part_id
+       END as fromSectionPart,
+
+       CASE
+       WHEN (rs1.section_order < rs2.section_order)
+       THEN rs1.section_order
+       ELSE rs2.section_order
+       END as fromSectionOrder,
+
+       CASE
+       WHEN (rs1.section_order < rs2.section_order)
+       THEN i2.section_part_id
+       ELSE i1.section_part_id
+       END as toSectionPart,
+
+       CASE
+       WHEN (rs1.section_order < rs2.section_order)
+       THEN rs2.section_order
+       ELSE rs1.section_order
+       END as toSectionOrder,
+
+       isAsc(CASE
+       WHEN (rs1.section_order < rs2.section_order)
+       THEN i1.section_part_id
+       ELSE i2.section_part_id
+       END,
+       i1.route_id) as minIsAsc,
+
+       isAsc(CASE
+       WHEN (rs1.section_order < rs2.section_order)
+       THEN i2.section_part_id
+       ELSE i1.section_part_id
+       END,
+       i1.route_id) as maxIsAsc,
+
+
+       (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id as routeId
+
+       FROM bus_nodejs.gps_info as i1
+
+
+       JOIN bus_nodejs.gps_info as i2
+       ON  i1.imei = i2.imei
+       AND i2.timestamp > i1.timestamp
+       AND i1.route_id = i2.route_id
+       AND NOT EXISTS (SELECT *
+       FROM bus_nodejs.gps_info as i3
+       WHERE i1.imei = i3.imei
+       AND i1.route_id = i3.route_id
+       AND i3.timestamp > i1.timestamp
+       AND i3.timestamp < i2.timestamp)
+
+       JOIN `bus-way`.section_part as sp1 ON sp1.id = i1.section_part_id
+       JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = i1.route_id
+
+       JOIN `bus-way`.section_part as sp2 ON sp2.id = i2.section_part_id
+       JOIN `bus-way`.route_section as rs2 ON rs2.section_id = sp2.section_id AND rs2.route_id = i1.route_id
+
+
+       JOIN `bus-way`.statistic_mode as sm ON sm.id = 1
+       JOIN `bus-way`.hour_type as ht ON ht.id = sm.hour_type_id
+       JOIN `bus-way`.hour_interval as hi ON hi.hour_type_id = ht.id
+
+       WHERE i1.route_id IS NOT NULL
+       AND ((sm.week_day_from <= sm.week_day_to AND sm.week_day_from <= DAYOFWEEK(i1.timestamp) AND sm.week_day_to >= DAYOFWEEK(i1.timestamp))
+       OR (sm.week_day_from > sm.week_day_to AND (sm.week_day_from <= DAYOFWEEK(i1.timestamp) OR sm.week_day_to >= DAYOFWEEK(i1.timestamp))))
+       AND   ((sm.month_from <= sm.month_to AND sm.month_from <= MONTH(i1.timestamp) AND sm.month_to >= MONTH(i1.timestamp))
+       OR (sm.month_from > sm.month_to AND (sm.month_from <= MONTH(i1.timestamp) OR sm.month_to >= MONTH(i1.timestamp))))
+       AND   ((hi.time_from <= hi.time_to AND hi.time_from <= TIME(i1.timestamp) AND hi.time_to >= TIME(i1.timestamp))
+       OR (hi.time_from > hi.time_to AND (hi.time_from <= TIME(i1.timestamp) OR hi.time_to >= TIME(i1.timestamp))))
+
+       LIMIT 0, 1000) as pairs ON TRUE
+
+
+ WHERE ((rs.section_order > pairs.fromSectionOrder AND rs.section_order < pairs.toSectionOrder)
+ OR (rs.section_order = pairs.fromSectionOrder AND pairs.fromSectionOrder != pairs.toSectionOrder
+ AND CAST(pairs.fromSectionPart AS SIGNED) * pairs.minIsAsc <= sp.id * pairs.minIsAsc)
+
+ OR (rs.section_order = pairs.toSectionOrder AND pairs.fromSectionOrder != pairs.toSectionOrder
+ AND CAST(pairs.toSectionPart AS SIGNED) * pairs.maxIsAsc >= sp.id * pairs.maxIsAsc)
+
+ OR (rs.section_order = pairs.toSectionOrder AND pairs.fromSectionOrder = pairs.toSectionOrder
+ AND CAST(pairs.toSectionPart AS SIGNED) * pairs.maxIsAsc >= sp.id * pairs.maxIsAsc
+ AND CAST(pairs.fromSectionPart AS SIGNED) * pairs.minIsAsc <= sp.id * pairs.minIsAsc))
+
+ AND rs.route_id = pairs.routeId
+
  */
