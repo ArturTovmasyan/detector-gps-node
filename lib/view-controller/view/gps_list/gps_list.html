@@ -20,10 +20,23 @@
             <!-- end navigation -->
 
             <div class="table-container">
-                <table>
-                    <tr ng-repeat="gps in gpses">
-
-                    </tr>
+                <table class="table table-bordered" style="margin-left: 400px">
+                    <thead>
+                        <tr>
+                            <th>IMEI</th>
+                            <th>Plate Number</th>
+                            <th>Line Number</th>
+                            <th>Last Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-striped">
+                        <tr ng-repeat="g in gps">
+                            <td ng-bind="g.imei"></td>
+                            <td ng-bind="g.plate_number"></td>
+                            <td ng-bind="g.line_number"></td>
+                            <td>{{ g.timestamp | date:"dd/MM/yyyy" }}</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
