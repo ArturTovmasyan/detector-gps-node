@@ -93,3 +93,139 @@ else {
     });
 }
 
+
+
+/*
+
+ SELECT i1.section_part_id as fromSectionPart, i2.section_part_id as toSectionPart,
+        (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id
+
+ FROM bus_nodejs.gps_info as i1
+
+ JOIN bus_nodejs.gps_info as i2
+ ON  i1.imei = i2.imei
+     AND i2.timestamp > i1.timestamp
+     AND i1.route_id = i2.route_id
+     AND NOT EXISTS (SELECT *
+     FROM bus_nodejs.gps_info as i3
+     WHERE i1.imei = i3.imei
+     AND i1.route_id = i3.route_id
+     AND i3.timestamp > i1.timestamp
+     AND i3.timestamp < i2.timestamp)
+
+ JOIN   (CALL statistic (i1.section_part_id, i2.section_part_id, i1.route_id)) as sectionParts ON TRUE
+
+ LIMIT 30
+
+
+
+
+
+
+ SELECT sp.id
+ FROM `bus-way`.section_part as sp
+ JOIN `bus-way`.section as s ON s.id = sp.section_id
+ JOIN `bus-way`.route_section as rs
+ ON rs.section_id = s.id
+
+ JOIN (SELECT MIN(rs1.section_order) as minOrder, MAX(rs1.section_order) as maxOrder
+ FROM `bus-way`.section_part as sp1
+ JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = 1
+ WHERE sp1.id = 26215 or sp1.id = 26216) as sectionOrders ON TRUE
+
+ WHERE rs.section_order >= sectionOrders.minOrder AND rs.section_order <= sectionOrders.maxOrder AND rs.route_id = 1
+
+
+
+
+
+
+
+
+ DROP PROCEDURE IF EXISTS statistic;
+ DELIMITER $$
+ CREATE PROCEDURE statistic ()
+ BEGIN
+
+    DECLARE done1 INT;
+
+    DECLARE sectionPartId1 INT;
+    DECLARE sectionPartId2 INT;
+    DECLARE timeToPass FLOAT;
+    DECLARE routeId INT;
+
+
+    DECLARE curs1 CURSOR FOR  SELECT i1.section_part_id as fromSectionPart, i2.section_part_id as toSectionPart,
+                             (i2.timestamp - i1.timestamp) as timeToPass, i1.route_id
+
+                             FROM bus_nodejs.gps_info as i1
+                             JOIN bus_nodejs.gps_info as i2
+                                 ON  i1.imei = i2.imei
+                                 AND i2.timestamp > i1.timestamp
+                                 AND i1.route_id = i2.route_id
+                                 AND NOT EXISTS (SELECT *
+                                                 FROM bus_nodejs.gps_info as i3
+                                                 WHERE i1.imei = i3.imei
+                                                 AND i1.route_id = i3.route_id
+                                                 AND i3.timestamp > i1.timestamp
+                                                 AND i3.timestamp < i2.timestamp)
+                             LIMIT 30;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done1 = 1;
+
+    DROP TEMPORARY TABLE IF EXISTS tblResults;
+    CREATE TEMPORARY TABLE IF NOT EXISTS tblResults  (
+        section_part_id1 INT,
+        section_part_id2 INT,
+        time_to_pass FLOAT,
+        route_id INT,
+        intermediate_section_part_id INT,
+        interval_to_pass FLOAT
+    );
+
+    OPEN curs1;
+    SET done1 = 0;
+    REPEAT
+
+        FETCH curs1 INTO sectionPartId1, sectionPartId2, timeToPass, routeId;
+
+        INSERT tblResults (section_part_id1, section_part_id2, time_to_pass, route_id, intermediate_section_part_id, interval_to_pass)
+                             SELECT sectionPartId1, sectionPartId2, timeToPass, routeId, sp.id, (timeToPass / allCount.cnt)
+                             FROM `bus-way`.section_part as sp
+                             JOIN `bus-way`.section as s ON s.id = sp.section_id
+                             JOIN `bus-way`.route_section as rs
+                             ON rs.section_id = s.id
+
+                             JOIN (SELECT MIN(rs1.section_order) as minOrder, MAX(rs1.section_order) as maxOrder
+                             FROM `bus-way`.section_part as sp1
+                             JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = routeId
+                             WHERE sp1.id = sectionPartId1 or sp1.id = sectionPartId2) as sectionOrders ON TRUE
+
+                             JOIN (SELECT COUNT(sp.id) as cnt
+                             FROM `bus-way`.section_part as sp
+                             JOIN `bus-way`.section as s ON s.id = sp.section_id
+                             JOIN `bus-way`.route_section as rs
+                             ON rs.section_id = s.id
+
+                             JOIN (SELECT MIN(rs1.section_order) as minOrder, MAX(rs1.section_order) as maxOrder
+                             FROM `bus-way`.section_part as sp1
+                             JOIN `bus-way`.route_section as rs1 ON rs1.section_id = sp1.section_id AND rs1.route_id = routeId
+                             WHERE sp1.id = sectionPartId1 or sp1.id = sectionPartId2) as sectionOrders ON TRUE
+                             WHERE rs.section_order >= sectionOrders.minOrder AND rs.section_order <= sectionOrders.maxOrder AND rs.route_id = routeId)
+                             as allCount ON TRUE
+
+
+                             WHERE rs.section_order >= sectionOrders.minOrder AND rs.section_order <= sectionOrders.maxOrder AND rs.route_id = routeId;
+
+    UNTIL done1 END REPEAT;
+    CLOSE curs1;
+
+    SELECT * FROM tblResults;
+
+ END; $$
+ DELIMITER ;
+
+
+
+
+ */
