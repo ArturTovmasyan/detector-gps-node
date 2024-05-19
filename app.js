@@ -14,7 +14,6 @@ var stat    = require('./lib/statistic');
 
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
-var kioskSocket = require('./lib/kiosk-socket').socketIo;
 
 /*********************************************************************************************
  currentBusPositions: structure
@@ -37,6 +36,7 @@ var kioskSocket = require('./lib/kiosk-socket').socketIo;
 
 if (cluster.isMaster){
 
+    var kioskSocket = require('./lib/kiosk-socket').socketIo;
     var workers = [];
 
     //Object to collect all fresh data from gps
