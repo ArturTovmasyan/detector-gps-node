@@ -57,8 +57,15 @@ if (cluster.isMaster){
 
                     if (msg.busInfo.statistic) {
                         for (var k in msg.busInfo.statistic.stopTimes) {
-                            kioskSocket.to('' + k).send(msg.busInfo);
-                            console.log(msg.busInfo.statistic);
+                            var sendData = {
+                                "lineNumber":  msg.busInfo.lineNumber,
+                                "routeId":     msg.busInfo.gpsData.route_id,
+                                "latitude":    msg.busInfo.gpsData.latitude,
+                                "longitude":   msg.busInfo.gpsData.longitude,
+                                "time":        msg.busInfo.statistic.stopTimes[k]
+                            };
+                            
+                            kioskSocket.to('' + k).send(sendData);
                         }
                     }
 
