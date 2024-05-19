@@ -195,7 +195,7 @@ function consecutiveBuses(imei, currentBusPositions, busesOrderInRoutes){
 
     //Calculate statistic data
     try {
-        if (currentBusPositions[frontImei]) {
+        if (currentBusPositions[frontImei] && newBasInfo.gpsData.section_part_id && currentBusPositions[frontImei].gpsData.section_part_id) {
             newBasInfo.statistic = stat.getTimeStatistics(routeId, newBasInfo.gpsData.section_part_id, currentBusPositions[frontImei].gpsData.section_part_id);
         }
     }
