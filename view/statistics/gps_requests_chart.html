@@ -5,8 +5,17 @@
         <title>GPS Requests Charts</title>
     </head>
     <body>
+        <div>
+            <select>
+                <option>IMEI</option>
+            </select>
+            <label for="from">From</label>
+            <input id="from" type="date"/>
+            <label for="to">To</label>
+            <input id="to" type="date"/>
+        </div>
 
-        <canvas id="chart" style="width: 100%;height: 500px"></canvas>
+        <canvas id="chart" style="width: 100%;height: 500px;margin-top: 50px"></canvas>
 
         <script type="text/javascript" src="../../node_modules/chart.js/Chart.min.js"></script>
         <script type="text/javascript">
