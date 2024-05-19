@@ -12,6 +12,8 @@ var param   = require('./config/parameters');
 var solver  = require('./lib/solver');
 
 
+var routeSectionOrder = require('./routeDeterminator').routeSectionOrder;
+
 var viewControl = require('./lib/view-controller');
 var io          = viewControl.get_socket();
 
@@ -32,7 +34,7 @@ if (cluster.isMaster) {
                 {
                     currentBusPositions[msg.busInfo.gpsData.imei] = msg.busInfo;
 
-                    io.send({busInfo: msg.busInfo});
+                    io.send({busInfo: msg.busInfo, routeSectionOrder: routeSectionOrder});
                 }
             }
         });
