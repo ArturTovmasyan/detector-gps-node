@@ -45,10 +45,10 @@ function checker(request_stream, err) {
         obj = config[url];
 
         if(!obj.event){
-            err("There is no Event Name in Config")
+            err(new Error("There is no Event Name in Config"));
         }
         else if(!obj.method || obj.method === method){
-            event.emit(obj.event,{param: 'World'})
+            event.emit(obj.event,{param: 'World'});
         }
     }
 
