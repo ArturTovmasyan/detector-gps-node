@@ -13,6 +13,7 @@
             <input id="from" type="date"/>
             <label for="to">To</label>
             <input id="to" type="date"/>
+            <input type="button" id="button" value="Filter"/>
         </div>
 
         <canvas id="chart" style="width: 100%;height: 400px;margin-top: 50px"></canvas>
@@ -86,6 +87,7 @@
                     }).done(updateChart);
                 }
 
+                $("#button").click(rest);
                 rest();
             });
         </script>
