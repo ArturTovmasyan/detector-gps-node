@@ -106,7 +106,7 @@ else {
 
     process.on('message', function(msg) {
        if (msg == 'reload'){
-           loader.reLoad();
+           loader.reload();
        }
     });
 }
